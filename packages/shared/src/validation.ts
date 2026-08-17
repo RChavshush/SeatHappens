@@ -3,9 +3,11 @@ import type { RuleErrorCode, SeatState, ValidationResult } from "./types.js";
 
 const ok: ValidationResult = { ok: true };
 
-function fail(code: RuleErrorCode, message: string): ValidationResult {
-  return { ok: false, code, message };
-}
+const fail = (code: RuleErrorCode, message: string): ValidationResult => ({
+  ok: false,
+  code,
+  message,
+});
 
 /**
  * Validate a seat selection over a single row. Cross-row selections are
@@ -14,10 +16,10 @@ function fail(code: RuleErrorCode, message: string): ValidationResult {
  * single empty seat trapped between occupied seats; a gap that already existed
  * is left untouched.
  */
-export function validateSelection(
+export const validateSelection = (
   row: SeatState[],
   selection: number[],
-): ValidationResult {
+): ValidationResult => {
   if (selection.length === 0) {
     return fail("EMPTY_SELECTION", "Select at least one seat.");
   }
@@ -60,15 +62,18 @@ export function validateSelection(
   }
 
   return ok;
-}
+};
 
-function applySelection(row: SeatState[], selection: number[]): SeatState[] {
+const applySelection = (
+  row: SeatState[],
+  selection: number[],
+): SeatState[] => {
   const next = [...row];
   for (const i of selection) next[i] = "held";
   return next;
-}
+};
 
-function trappedSingles(row: SeatState[]): Set<number> {
+const trappedSingles = (row: SeatState[]): Set<number> => {
   const trapped = new Set<number>();
   for (let i = 1; i < row.length - 1; i++) {
     const isSingleGap =
@@ -76,4 +81,4 @@ function trappedSingles(row: SeatState[]): Set<number> {
     if (isSingleGap) trapped.add(i);
   }
   return trapped;
-}
+};

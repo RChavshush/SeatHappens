@@ -12,6 +12,11 @@ Runtime values (constants, Zod schemas, functions) stay in their own files;
 their derived types (`z.infer<...>`, `(typeof CONST)[number]`) are re-exported
 from `types.ts`.
 
+### Use arrow functions
+
+Declare functions as arrow functions assigned to `const`, not with the
+`function` keyword. Applies to module-level functions, helpers, and callbacks.
+
 ### Comments only when the code cannot speak for itself
 
 Do not add comments that restate what the code already says. Prefer clear
