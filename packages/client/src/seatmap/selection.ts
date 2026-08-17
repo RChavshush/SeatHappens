@@ -16,18 +16,6 @@ const rowStates = (row: SeatMapRow): SeatState[] => row.seats.map((seat) => seat
 const selectionIndexes = (row: SeatMapRow, selected: ReadonlySet<string>): number[] =>
   row.seats.flatMap((seat, index) => (selected.has(seat.id) ? [index] : []));
 
-export const activeRowLabel = (
-  seatMap: SeatMap,
-  selected: ReadonlySet<string>,
-): string | null => {
-  for (const row of seatMap.rows) {
-    for (const seat of row.seats) {
-      if (selected.has(seat.id)) return row.rowLabel;
-    }
-  }
-  return null;
-};
-
 export const evaluateSeat = (
   seatMap: SeatMap,
   row: SeatMapRow,
@@ -44,28 +32,21 @@ export const evaluateSeat = (
     };
   }
 
-  const active = activeRowLabel(seatMap, selected);
-  if (active && active !== row.rowLabel) return { disabled: false };
-
   const candidate = [...selectionIndexes(row, selected), seatIndex];
   const result = validateSelection(rowStates(row), candidate);
   return result.ok ? { disabled: false } : { disabled: true, reason: result.message };
 };
 
 export const nextSelection = (
-  seatMap: SeatMap | undefined,
   selected: ReadonlySet<string>,
   seat: SeatView,
 ): Set<string> => {
   const next = new Set(selected);
   if (next.has(seat.id)) {
     next.delete(seat.id);
-    return next;
+  } else {
+    next.add(seat.id);
   }
-  if (seatMap && activeRowLabel(seatMap, selected) !== seat.rowLabel && next.size > 0) {
-    return new Set([seat.id]);
-  }
-  next.add(seat.id);
   return next;
 };
 

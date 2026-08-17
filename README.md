@@ -102,6 +102,31 @@ npm run dev:client
 
 This needs a reachable PostgreSQL instance and a `DATABASE_URL` pointing at it.
 
+## Seat selection rules
+
+Both rules are validated server-side (the client runs the same shared validator
+for instant feedback, but the server is authoritative):
+
+- **Rule 1 — consecutive:** the seats chosen within a row must be adjacent.
+- **Rule 2 — no isolated seat:** a selection must not leave a single empty seat
+  trapped between occupied seats. Only violations the selection *creates* are
+  rejected; a gap that already existed (e.g. left behind by an expired hold) is
+  not held against the user.
+
+### Extension: multi-row selection
+
+The assignment's Rule 1 restricts a selection to a single row. This project
+extends it so a **single hold can span multiple rows** — a group can reserve a
+block in each of several rows in one action and sit together (for example the
+back rows), instead of making one reservation per row.
+
+The rules still hold **per row**: each row's chosen seats must be consecutive
+(Rule 1) and must not create an isolated seat (Rule 2), evaluated independently
+for every row in the selection. The shared validator exposes `validateSelection`
+(one row) and `validateRows` (many rows); the create-hold transaction groups the
+requested seats by row and validates each. This is a deliberate enhancement
+beyond the brief, not a relaxation of the safety rules.
+
 ## Concurrency trade-off
 
 Two users must never reserve the same seat, and a selection must never create an

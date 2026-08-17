@@ -88,3 +88,22 @@ describe("create hold", () => {
     expect(res.body.code).toBe("SEAT_UNAVAILABLE");
   });
 });
+
+describe("createHold — multi-row selection", () => {
+  it("holds consecutive seats spanning two rows in one request", async () => {
+    const rowB = await seatIdsForRow("B");
+    const rowC = await seatIdsForRow("C");
+    const res = await postHold(userA, [rowB[0]!, rowB[1]!, rowC[0]!, rowC[1]!]);
+    expect(res.status).toBe(201);
+    expect(res.body.seatIds).toHaveLength(4);
+    await request(app).delete(`/holds/${res.body.id}`).auth(userA.token, { type: "bearer" });
+  });
+
+  it("rejects when one row's run is not consecutive", async () => {
+    const rowD = await seatIdsForRow("D");
+    const rowE = await seatIdsForRow("E");
+    const res = await postHold(userA, [rowD[0]!, rowD[1]!, rowE[0]!, rowE[2]!]);
+    expect(res.status).toBe(422);
+    expect(res.body.code).toBe("NOT_CONSECUTIVE");
+  });
+});

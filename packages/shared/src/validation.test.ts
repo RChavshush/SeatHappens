@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateSelection } from "./validation.js";
+import { validateRows, validateSelection } from "./validation.js";
 import type { SeatState } from "./seats.js";
 
 // Helpers to build a row from a compact string.
@@ -141,5 +141,56 @@ describe("validateSelection — 5-seat balcony rows", () => {
       ok: false,
       code: "ISOLATED_SEAT",
     });
+  });
+});
+
+describe("validateRows — multi-row selection", () => {
+  const empty10 = (): SeatState[] => Array(10).fill("available");
+
+  it("accepts consecutive runs in two separate rows", () => {
+    expect(
+      validateRows([
+        { row: empty10(), selection: [0, 1, 2] },
+        { row: empty10(), selection: [5, 6] },
+      ]),
+    ).toEqual({ ok: true });
+  });
+
+  it("ignores rows with no selection", () => {
+    expect(
+      validateRows([
+        { row: empty10(), selection: [] },
+        { row: empty10(), selection: [3, 4] },
+      ]),
+    ).toEqual({ ok: true });
+  });
+
+  it("rejects when any row's run is not consecutive", () => {
+    expect(
+      validateRows([
+        { row: empty10(), selection: [0, 1] },
+        { row: empty10(), selection: [4, 6] },
+      ]),
+    ).toMatchObject({ ok: false, code: "NOT_CONSECUTIVE" });
+  });
+
+  it("rejects when any row traps a single seat", () => {
+    // row 2: seats 1,2 booked, select 4,5 -> traps seat 3
+    const trapRow: SeatState[] = ["booked", "booked", ...Array(8).fill("available")];
+    expect(
+      validateRows([
+        { row: empty10(), selection: [0, 1] },
+        { row: trapRow, selection: [3, 4] },
+      ]),
+    ).toMatchObject({ ok: false, code: "ISOLATED_SEAT" });
+  });
+
+  it("rejects an entirely empty multi-row selection", () => {
+    expect(
+      validateRows([
+        { row: empty10(), selection: [] },
+        { row: empty10(), selection: [] },
+      ]),
+    ).toMatchObject({ ok: false, code: "EMPTY_SELECTION" });
   });
 });

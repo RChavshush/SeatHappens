@@ -1,5 +1,10 @@
 import { isOccupied } from "./seats.js";
-import type { RuleErrorCode, SeatState, ValidationResult } from "./types.js";
+import type {
+  RowSelection,
+  RuleErrorCode,
+  SeatState,
+  ValidationResult,
+} from "./types.js";
 
 const ok: ValidationResult = { ok: true };
 
@@ -54,6 +59,18 @@ export const validateSelection = (
     }
   }
 
+  return ok;
+};
+
+export const validateRows = (rows: RowSelection[]): ValidationResult => {
+  const active = rows.filter((r) => r.selection.length > 0);
+  if (active.length === 0) {
+    return fail("EMPTY_SELECTION", "Select at least one seat.");
+  }
+  for (const { row, selection } of active) {
+    const result = validateSelection(row, selection);
+    if (!result.ok) return result;
+  }
   return ok;
 };
 

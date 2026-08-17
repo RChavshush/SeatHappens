@@ -50,6 +50,11 @@ export interface SeatBlueprint {
   section: SeatSection;
 }
 
+export interface RowSelection {
+  row: SeatState[];
+  selection: number[];
+}
+
 export type RuleErrorCode =
   | "EMPTY_SELECTION"
   | "OUT_OF_RANGE"

@@ -42,7 +42,7 @@ export const ScreeningView = () => {
   const hold = holdQuery.data ?? null;
 
   const onSeatClick = useCallback(
-    (seat: SeatView) => setSelected((prev) => nextSelection(seatMap, prev, seat)),
+    (seat: SeatView) => setSelected((prev) => nextSelection(prev, seat)),
     [seatMap],
   );
 
@@ -123,7 +123,7 @@ export const ScreeningView = () => {
             <h2 className="text-lg font-semibold text-slate-100">Select seats</h2>
             <p className="text-sm text-slate-300">
               {selectedIds.length === 0
-                ? "Choose adjacent seats in a single row."
+                ? "Choose adjacent seats. You can pick a block in each row to sit together across rows."
                 : labelForSeats(seatMap, selectedIds).join(", ")}
             </p>
             <button

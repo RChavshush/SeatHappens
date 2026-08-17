@@ -65,17 +65,17 @@ describe("nextSelection", () => {
   const map = buildMap([buildRow("A", ["available", "available"]), buildRow("B", ["available"])]);
 
   it("toggles a seat off", () => {
-    const result = nextSelection(map, new Set(["A1"]), map.rows[0]!.seats[0]!);
+    const result = nextSelection(new Set(["A1"]), map.rows[0]!.seats[0]!);
     expect(result.has("A1")).toBe(false);
   });
 
-  it("replaces the selection when switching rows", () => {
-    const result = nextSelection(map, new Set(["A1"]), map.rows[1]!.seats[0]!);
-    expect([...result]).toEqual(["B1"]);
+  it("accumulates a seat in another row (multi-row)", () => {
+    const result = nextSelection(new Set(["A1"]), map.rows[1]!.seats[0]!);
+    expect([...result].sort()).toEqual(["A1", "B1"]);
   });
 
   it("extends the selection within the same row", () => {
-    const result = nextSelection(map, new Set(["A1"]), map.rows[0]!.seats[1]!);
+    const result = nextSelection(new Set(["A1"]), map.rows[0]!.seats[1]!);
     expect([...result].sort()).toEqual(["A1", "A2"]);
   });
 });
