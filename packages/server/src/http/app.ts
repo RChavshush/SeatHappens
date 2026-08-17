@@ -4,6 +4,7 @@ import { authGuard } from "../auth/guard.js";
 import { authRouter } from "../auth/routes.js";
 import { env } from "../env.js";
 import { errorHandler } from "./middleware/error-handler.js";
+import { screeningsRouter } from "./routes/screenings.js";
 
 export const buildApp = (): Express => {
   const app = express();
@@ -18,6 +19,8 @@ export const buildApp = (): Express => {
   app.use("/auth", authRouter);
 
   app.use(authGuard);
+
+  app.use("/screenings", screeningsRouter);
 
   app.use(errorHandler);
   return app;
