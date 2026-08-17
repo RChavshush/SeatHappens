@@ -1,11 +1,19 @@
 import type { z } from "zod";
-import type { Hold, Reservation } from "@cinema/shared";
+import type { Hold, Reservation, SeatsUpdatedEvent } from "@cinema/shared";
 import type { envSchema } from "./env.js";
 import type { Prisma } from "./generated/prisma/index.js";
 
 export type Env = z.infer<typeof envSchema>;
 
 export type Tx = Prisma.TransactionClient;
+
+export type SeatDelta = SeatsUpdatedEvent["seats"][number];
+
+export type SeatBroadcaster = (screeningId: string, seats: SeatDelta[]) => void;
+
+export interface SocketData {
+  user: AuthUserContext;
+}
 
 export interface HoldMutationResult {
   hold: Hold;
