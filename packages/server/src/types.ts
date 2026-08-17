@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { Hold } from "@cinema/shared";
+import type { Hold, Reservation } from "@cinema/shared";
 import type { envSchema } from "./env.js";
 import type { Prisma } from "./generated/prisma/index.js";
 
@@ -10,6 +10,17 @@ export type Tx = Prisma.TransactionClient;
 export interface HoldMutationResult {
   hold: Hold;
   heldSeatIds: string[];
+  releasedSeatIds: string[];
+}
+
+export interface ConfirmResult {
+  reservation: Reservation;
+  bookedSeatIds: string[];
+  screeningId: string;
+}
+
+export interface ReleaseResult {
+  screeningId: string;
   releasedSeatIds: string[];
 }
 
