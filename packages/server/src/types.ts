@@ -1,7 +1,17 @@
 import type { z } from "zod";
+import type { Hold } from "@cinema/shared";
 import type { envSchema } from "./env.js";
+import type { Prisma } from "./generated/prisma/index.js";
 
 export type Env = z.infer<typeof envSchema>;
+
+export type Tx = Prisma.TransactionClient;
+
+export interface HoldMutationResult {
+  hold: Hold;
+  heldSeatIds: string[];
+  releasedSeatIds: string[];
+}
 
 export type RequestPart = "body" | "query" | "params";
 
