@@ -11,6 +11,6 @@ const io = createRealtime(server);
 setBroadcaster(makeBroadcaster(io));
 startExpiryJob();
 
-server.listen(env.PORT, () => {
-  console.log(`cinema server listening on :${env.PORT}`);
+server.listen(env.SERVER_PORT, () => {
+  console.log(`cinema server listening on :${env.SERVER_PORT}`);
 });
