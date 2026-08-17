@@ -1,0 +1,12 @@
+{
+  "name": "@cinema/client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"client scaffolded in Task 9\" && exit 0"
+  },
+  "dependencies": {
+    "@cinema/shared": "*"
+  }
+}
