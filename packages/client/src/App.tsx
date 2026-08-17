@@ -1,5 +1,6 @@
 import { useAuth } from "./auth/AuthContext";
 import { AuthScreen } from "./auth/AuthScreen";
+import { ScreeningView } from "./screening/ScreeningView";
 
 export const App = () => {
   const { user, token, signOut } = useAuth();
@@ -21,7 +22,9 @@ export const App = () => {
           </button>
         </div>
       </header>
-      <main className="flex-1 p-4" />
+      <main className="flex-1 p-4">
+        <ScreeningView />
+      </main>
     </div>
   );
 };
