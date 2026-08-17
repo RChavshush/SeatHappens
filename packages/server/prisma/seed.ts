@@ -27,8 +27,10 @@ const main = async () => {
       });
     }
 
-    await tx.seat.deleteMany();
-    await tx.seat.createMany({ data: seats });
+    const seatCount = await tx.seat.count();
+    if (seatCount === 0) {
+      await tx.seat.createMany({ data: seats });
+    }
 
     const movie = await tx.movie.upsert({
       where: { id: "seed-movie" },
