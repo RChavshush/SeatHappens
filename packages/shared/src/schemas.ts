@@ -76,21 +76,8 @@ export const reservationSchema = z.object({
   confirmedAt: z.string().datetime(),
 });
 
-export const API_ERROR_CODES = [
-  "VALIDATION_FAILED",
-  "UNAUTHORIZED",
-  "SEAT_UNAVAILABLE",
-  "NOT_CONSECUTIVE",
-  "ISOLATED_SEAT",
-  "HOLD_EXPIRED",
-  "HOLD_NOT_FOUND",
-  "NOT_FOUND",
-  "CONFLICT",
-  "INTERNAL",
-] as const;
-
 export const errorResponseSchema = z.object({
-  code: z.enum(API_ERROR_CODES),
+  code: z.string(),
   message: z.string(),
   details: z.unknown().optional(),
 });

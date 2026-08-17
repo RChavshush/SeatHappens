@@ -11,9 +11,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@cinema/shared": "*"
+    "@cinema/shared": "*",
+    "http-errors": "^2.0.0"
   },
   "devDependencies": {
+    "@types/http-errors": "^2.0.4",
     "tsx": "^4.19.0",
     "vitest": "^2.1.0"
   }

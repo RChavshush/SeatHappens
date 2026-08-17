@@ -1,7 +1,6 @@
 import type { z } from "zod";
 import type { SEAT_SECTIONS, SEAT_STATES } from "./seats.js";
 import type {
-  API_ERROR_CODES,
   authResponseSchema,
   createHoldRequestSchema,
   errorResponseSchema,
@@ -34,7 +33,6 @@ export type CreateHoldRequest = z.infer<typeof createHoldRequestSchema>;
 export type Hold = z.infer<typeof holdSchema>;
 export type Reservation = z.infer<typeof reservationSchema>;
 
-export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;
 
 export type SeatsUpdatedEvent = z.infer<typeof seatsUpdatedEventSchema>;
