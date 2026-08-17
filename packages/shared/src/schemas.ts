@@ -57,7 +57,7 @@ export const seatMapSchema = z.object({
 });
 
 export const createHoldRequestSchema = z.object({
-  seatIds: z.array(z.string()).min(1).max(10),
+  seatIds: z.array(z.string()).min(1),
 });
 
 export const holdSchema = z.object({
