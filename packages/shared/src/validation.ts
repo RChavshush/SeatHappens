@@ -9,13 +9,6 @@ const fail = (code: RuleErrorCode, message: string): ValidationResult => ({
   message,
 });
 
-/**
- * Validate a seat selection over a single row. Cross-row selections are
- * rejected by the caller before this runs, so all indices refer to one row.
- * Rule 1: the selection must be contiguous. Rule 2: it must not *create* a
- * single empty seat trapped between occupied seats; a gap that already existed
- * is left untouched.
- */
 export const validateSelection = (
   row: SeatState[],
   selection: number[],
