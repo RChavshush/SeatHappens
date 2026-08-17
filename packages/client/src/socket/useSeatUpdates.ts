@@ -26,7 +26,7 @@ export const useSeatUpdates = (
     const onSeatsUpdated = (raw: unknown) => {
       const parsed = seatsUpdatedEventSchema.safeParse(raw);
       if (!parsed.success || parsed.data.screeningId !== screeningId) return;
-      const myHold = queryClient.getQueryData<Hold | null>(queryKeys.myHold);
+      const myHold = queryClient.getQueryData<Hold | null>(queryKeys.myHold(screeningId));
       queryClient.setQueryData<SeatMap>(queryKeys.seatMap(screeningId), (prev) =>
         prev ? applySeatsUpdate(prev, parsed.data, myHold?.seatIds ?? []) : prev,
       );

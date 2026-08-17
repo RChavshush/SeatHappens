@@ -3,9 +3,11 @@ import type { Hold, Reservation } from "@cinema/shared";
 import { apiFetch } from "./client";
 import { ApiError } from "./errors";
 
-export const getMyHold = async (): Promise<Hold | null> => {
+export const getMyHold = async (screeningId: string): Promise<Hold | null> => {
   try {
-    const data = await apiFetch<unknown>("/me/hold");
+    const data = await apiFetch<unknown>(
+      `/me/hold?screeningId=${encodeURIComponent(screeningId)}`,
+    );
     return data === null ? null : holdSchema.parse(data);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;

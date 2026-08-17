@@ -30,9 +30,9 @@ export const ScreeningView = () => {
   });
 
   const holdQuery = useQuery({
-    queryKey: queryKeys.myHold,
-    queryFn: getMyHold,
-    enabled: Boolean(token),
+    queryKey: queryKeys.myHold(screeningId ?? "none"),
+    queryFn: () => getMyHold(screeningId!),
+    enabled: Boolean(token && screeningId),
   });
 
   useSeatUpdates(screeningId, token);
@@ -55,7 +55,7 @@ export const ScreeningView = () => {
   const createMutation = useMutation({
     mutationFn: (seatIds: string[]) => createHold(screeningId!, seatIds),
     onSuccess: (created) => {
-      queryClient.setQueryData(queryKeys.myHold, created);
+      queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), created);
       setSelected(new Set());
       invalidateSeatMap();
     },
@@ -65,7 +65,7 @@ export const ScreeningView = () => {
   const confirmMutation = useMutation({
     mutationFn: (holdId: string) => confirmHold(holdId),
     onSuccess: (reservation) => {
-      queryClient.setQueryData(queryKeys.myHold, null);
+      queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), null);
       invalidateSeatMap();
       push("success", `Booked! Reference ${reservation.referenceCode}.`);
     },
@@ -79,14 +79,14 @@ export const ScreeningView = () => {
   const releaseMutation = useMutation({
     mutationFn: (holdId: string) => releaseHold(holdId),
     onSuccess: () => {
-      queryClient.setQueryData(queryKeys.myHold, null);
+      queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), null);
       invalidateSeatMap();
     },
     onError: showError,
   });
 
   const onExpire = useCallback(() => {
-    queryClient.setQueryData(queryKeys.myHold, null);
+    queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), null);
     invalidateSeatMap();
     push("info", "Your hold expired and the seats were released.");
   }, [queryClient, invalidateSeatMap, push]);
