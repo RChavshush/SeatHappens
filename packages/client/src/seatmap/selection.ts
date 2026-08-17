@@ -76,3 +76,16 @@ export const selectedSeatIds = (
   seatMap.rows.flatMap((row) =>
     row.seats.filter((seat) => selected.has(seat.id)).map((seat) => seat.id),
   );
+
+export const labelForSeats = (
+  seatMap: SeatMap,
+  ids: readonly string[],
+): string[] => {
+  const byId = new Map<string, string>();
+  for (const row of seatMap.rows) {
+    for (const seat of row.seats) {
+      byId.set(seat.id, `${seat.rowLabel}${seat.seatNumber}`);
+    }
+  }
+  return ids.map((id) => byId.get(id) ?? id);
+};
