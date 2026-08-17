@@ -116,16 +116,29 @@ for instant feedback, but the server is authoritative):
 ### Extension: multi-row selection
 
 The assignment's Rule 1 restricts a selection to a single row. This project
-extends it so a **single hold can span multiple rows** — a group can reserve a
-block in each of several rows in one action and sit together (for example the
-back rows), instead of making one reservation per row.
+extends it so a **single hold can span multiple rows** — a group can reserve
+seats together across adjacent rows in one action (for example the back rows),
+instead of making one reservation per row.
 
-The rules still hold **per row**: each row's chosen seats must be consecutive
-(Rule 1) and must not create an isolated seat (Rule 2), evaluated independently
-for every row in the selection. The shared validator exposes `validateSelection`
-(one row) and `validateRows` (many rows); the create-hold transaction groups the
-requested seats by row and validates each. This is a deliberate enhancement
-beyond the brief, not a relaxation of the safety rules.
+A multi-row selection is valid when **all the seats form one connected group**.
+Two seats are "connected" when they are neighbours:
+
+- **horizontally** — next to each other in the same row,
+- **vertically** — the same seat number in an adjacent row (directly in
+  front/behind), or
+- **around the wrap** — the last seat of a row and the first seat of the next
+  row.
+
+A selection is rejected if any seat is left stranded with no selected neighbour.
+The original per-row rules still apply on top: within each row the seats must be
+consecutive (Rule 1) and must not leave an isolated single empty seat (Rule 2).
+
+The shared validator exposes `validateSelection` (one row) and `validateRows`
+(the connected-group check across rows); the create-hold transaction groups the
+requested seats by row and runs `validateRows`. The client runs the same check
+live, so a seat that would break the group is disabled before you click it. This
+is a deliberate enhancement beyond the brief, not a relaxation of the safety
+rules.
 
 ## Concurrency trade-off
 

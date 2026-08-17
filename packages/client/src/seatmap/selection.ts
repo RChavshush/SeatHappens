@@ -1,5 +1,5 @@
-import { isOccupied, validateSelection } from "@cinema/shared";
-import type { SeatMap, SeatMapRow, SeatState, SeatView } from "@cinema/shared";
+import { isOccupied, validateRows } from "@cinema/shared";
+import type { RowSelection, SeatMap, SeatView } from "@cinema/shared";
 import type { SeatEvaluation, SeatVariant } from "./types";
 
 export const seatVariant = (seat: SeatView): SeatVariant =>
@@ -11,16 +11,21 @@ export const seatVariant = (seat: SeatView): SeatVariant =>
         : "held"
       : "available";
 
-const rowStates = (row: SeatMapRow): SeatState[] => row.seats.map((seat) => seat.status);
-
-const selectionIndexes = (row: SeatMapRow, selected: ReadonlySet<string>): number[] =>
-  row.seats.flatMap((seat, index) => (selected.has(seat.id) ? [index] : []));
+const buildRowSelections = (
+  seatMap: SeatMap,
+  selectedIds: ReadonlySet<string>,
+): RowSelection[] =>
+  seatMap.rows.map((row, rowIndex) => ({
+    rowIndex,
+    row: row.seats.map((seat) => (seat.heldByMe ? "available" : seat.status)),
+    selection: row.seats.flatMap((seat, index) =>
+      selectedIds.has(seat.id) ? [index] : [],
+    ),
+  }));
 
 export const evaluateSeat = (
   seatMap: SeatMap,
-  row: SeatMapRow,
   seat: SeatView,
-  seatIndex: number,
   selected: ReadonlySet<string>,
 ): SeatEvaluation => {
   if (selected.has(seat.id)) return { disabled: false };
@@ -32,8 +37,9 @@ export const evaluateSeat = (
     };
   }
 
-  const candidate = [...selectionIndexes(row, selected), seatIndex];
-  const result = validateSelection(rowStates(row), candidate);
+  const candidate = new Set(selected);
+  candidate.add(seat.id);
+  const result = validateRows(buildRowSelections(seatMap, candidate));
   return result.ok ? { disabled: false } : { disabled: true, reason: result.message };
 };
 

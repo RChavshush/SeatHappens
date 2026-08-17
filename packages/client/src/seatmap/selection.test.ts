@@ -34,30 +34,46 @@ describe("evaluateSeat", () => {
   const map = buildMap([row]);
 
   it("disables an occupied seat with a reason", () => {
-    const result = evaluateSeat(map, row, row.seats[3]!, 3, new Set());
+    const result = evaluateSeat(map, row.seats[3]!, new Set());
     expect(result.disabled).toBe(true);
     expect(result.reason).toMatch(/taken/i);
   });
 
   it("disables a non-consecutive addition", () => {
-    const result = evaluateSeat(map, row, row.seats[2]!, 2, new Set(["A1"]));
+    const result = evaluateSeat(map, row.seats[2]!, new Set(["A1"]));
     expect(result.disabled).toBe(true);
-    expect(result.reason).toMatch(/consecutive/i);
+    expect(result.reason).toMatch(/next to each other|consecutive/i);
   });
 
   it("disables a selection that would isolate a seat", () => {
     const isolate = buildRow("B", ["available", "available", "booked"]);
     const isolateMap = buildMap([isolate]);
-    const result = evaluateSeat(isolateMap, isolate, isolate.seats[0]!, 0, new Set());
+    const result = evaluateSeat(isolateMap, isolate.seats[0]!, new Set());
     expect(result.disabled).toBe(true);
     expect(result.reason).toMatch(/trap|isolate|single/i);
   });
 
-  it("allows seats in another row while a selection is active", () => {
-    const other = buildRow("C", ["available"]);
+  it("allows a seat directly behind the active selection (connected)", () => {
+    const other = buildRow("B", ["available"]);
     const twoRowMap = buildMap([row, other]);
-    const result = evaluateSeat(twoRowMap, other, other.seats[0]!, 0, new Set(["A1"]));
+    const result = evaluateSeat(twoRowMap, other.seats[0]!, new Set(["A1"]));
     expect(result.disabled).toBe(false);
+  });
+
+  it("allows extending your own already-held seats", () => {
+    const held = buildRow("A", ["held", "available"]);
+    held.seats[0] = { ...held.seats[0]!, heldByMe: true };
+    const heldMap = buildMap([held]);
+    const result = evaluateSeat(heldMap, held.seats[1]!, new Set(["A1"]));
+    expect(result.disabled).toBe(false);
+  });
+
+  it("disables a seat disconnected from the active selection", () => {
+    // A1 selected; B3 in the next row touches nothing selected
+    const other = buildRow("B", ["available", "available", "available"]);
+    const twoRowMap = buildMap([row, other]);
+    const result = evaluateSeat(twoRowMap, other.seats[2]!, new Set(["A1"]));
+    expect(result.disabled).toBe(true);
   });
 });
 

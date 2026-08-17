@@ -71,7 +71,56 @@ export const validateRows = (rows: RowSelection[]): ValidationResult => {
     const result = validateSelection(row, selection);
     if (!result.ok) return result;
   }
+  if (!isConnected(active)) {
+    return fail(
+      "NOT_CONSECUTIVE",
+      "All selected seats must be next to each other in one group.",
+    );
+  }
   return ok;
+};
+
+const isConnected = (rows: RowSelection[]): boolean => {
+  const nodes = new Set<string>();
+  const lastCol = new Map<number, number>();
+  for (const { rowIndex, row, selection } of rows) {
+    lastCol.set(rowIndex, row.length - 1);
+    for (const col of selection) nodes.add(`${rowIndex}:${col}`);
+  }
+  const has = (r: number, c: number): boolean => nodes.has(`${r}:${c}`);
+
+  const neighbors = (r: number, c: number): string[] => {
+    const out: string[] = [];
+    if (has(r, c - 1)) out.push(`${r}:${c - 1}`);
+    if (has(r, c + 1)) out.push(`${r}:${c + 1}`);
+    if (has(r - 1, c)) out.push(`${r - 1}:${c}`);
+    if (has(r + 1, c)) out.push(`${r + 1}:${c}`);
+    const endOfThis = lastCol.get(r);
+    if (endOfThis !== undefined && c === endOfThis && has(r + 1, 0)) {
+      out.push(`${r + 1}:0`);
+    }
+    const endOfPrev = lastCol.get(r - 1);
+    if (c === 0 && endOfPrev !== undefined && has(r - 1, endOfPrev)) {
+      out.push(`${r - 1}:${endOfPrev}`);
+    }
+    return out;
+  };
+
+  const start = nodes.values().next().value;
+  if (start === undefined) return true;
+  const seen = new Set<string>([start]);
+  const queue = [start];
+  while (queue.length > 0) {
+    const current = queue.pop()!;
+    const [r, c] = current.split(":").map(Number) as [number, number];
+    for (const next of neighbors(r, c)) {
+      if (!seen.has(next)) {
+        seen.add(next);
+        queue.push(next);
+      }
+    }
+  }
+  return seen.size === nodes.size;
 };
 
 const applySelection = (

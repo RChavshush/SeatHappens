@@ -16,13 +16,13 @@ export const SeatMap = ({ seatMap, selected, onSeatClick }: SeatMapProps) => {
   const renderRow = (row: SeatMapRow) => (
     <div key={row.rowLabel} className="flex items-center gap-1">
       <span className="w-5 shrink-0 text-right text-xs text-slate-500">{row.rowLabel}</span>
-      {row.seats.map((seat, index) => (
+      {row.seats.map((seat) => (
         <Seat
           key={seat.id}
           seat={seat}
           variant={seatVariant(seat)}
           selected={selected.has(seat.id)}
-          evaluation={evaluateSeat(seatMap, row, seat, index, selected)}
+          evaluation={evaluateSeat(seatMap, seat, selected)}
           onClick={onSeatClick}
         />
       ))}

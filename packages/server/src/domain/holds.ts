@@ -77,7 +77,7 @@ export const createHold = async (
     const rowSeats = await tx.seat.findMany({
       where: { rowLabel: { in: rowLabels } },
       orderBy: [{ rowLabel: "asc" }, { seatNumber: "asc" }],
-      select: { id: true, rowLabel: true },
+      select: { id: true, rowLabel: true, rowIndex: true },
     });
     const allRowSeatIds = rowSeats.map((s) => s.id);
     const [booked, locked] = await Promise.all([
@@ -102,7 +102,7 @@ export const createHold = async (
       const selection = seatsInRow
         .map((s, i) => (selectedInRow.has(s.id) ? i : -1))
         .filter((i) => i >= 0);
-      return { row, selection };
+      return { rowIndex: seatsInRow[0]!.rowIndex, row, selection };
     });
 
     const result = validateRows(rowSelections);

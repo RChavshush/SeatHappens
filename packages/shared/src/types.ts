@@ -51,6 +51,7 @@ export interface SeatBlueprint {
 }
 
 export interface RowSelection {
+  rowIndex: number;
   row: SeatState[];
   selection: number[];
 }

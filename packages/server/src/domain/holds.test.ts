@@ -107,3 +107,23 @@ describe("createHold — multi-row selection", () => {
     expect(res.body.code).toBe("NOT_CONSECUTIVE");
   });
 });
+
+describe("createHold — connected group across rows", () => {
+  it("rejects a seat left disconnected in the next row (image 1)", async () => {
+    const k = await seatIdsForRow("K"); // 5 seats
+    const l = await seatIdsForRow("L");
+    // K2,K3,K4 + L1 -> L1 touches nothing selected
+    const res = await postHold(userA, [k[1]!, k[2]!, k[3]!, l[0]!]);
+    expect(res.status).toBe(422);
+    expect(res.body.code).toBe("NOT_CONSECUTIVE");
+  });
+
+  it("accepts a run that wraps from row end into the next row (image 2)", async () => {
+    const k = await seatIdsForRow("K");
+    const l = await seatIdsForRow("L");
+    // K2,K3,K4,K5 + L1 -> L1 connects to K5 via the wrap
+    const res = await postHold(userA, [k[1]!, k[2]!, k[3]!, k[4]!, l[0]!]);
+    expect(res.status).toBe(201);
+    await request(app).delete(`/holds/${res.body.id}`).auth(userA.token, { type: "bearer" });
+  });
+});

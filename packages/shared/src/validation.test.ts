@@ -144,43 +144,73 @@ describe("validateSelection — 5-seat balcony rows", () => {
   });
 });
 
-describe("validateRows — multi-row selection", () => {
-  const empty10 = (): SeatState[] => Array(10).fill("available");
+describe("validateRows — multi-row selection (connected group)", () => {
+  const empty5 = (): SeatState[] => Array(5).fill("available");
 
-  it("accepts consecutive runs in two separate rows", () => {
+  it("accepts a block aligned across two rows (same columns)", () => {
+    // K2,3,4 + L2,3,4 — connected vertically
     expect(
       validateRows([
-        { row: empty10(), selection: [0, 1, 2] },
-        { row: empty10(), selection: [5, 6] },
+        { rowIndex: 0, row: empty5(), selection: [1, 2, 3] },
+        { rowIndex: 1, row: empty5(), selection: [1, 2, 3] },
       ]),
     ).toEqual({ ok: true });
+  });
+
+  it("accepts a run that wraps from a row end to the next row start", () => {
+    // K2,3,4,5 + L1 — L1 connects to K5 via the wrap (PDF image 2)
+    expect(
+      validateRows([
+        { rowIndex: 0, row: empty5(), selection: [1, 2, 3, 4] },
+        { rowIndex: 1, row: empty5(), selection: [0] },
+      ]),
+    ).toEqual({ ok: true });
+  });
+
+  it("rejects a seat left disconnected in another row", () => {
+    // K2,3,4 + L1 — L1 touches no selected seat (image 1)
+    expect(
+      validateRows([
+        { rowIndex: 0, row: empty5(), selection: [1, 2, 3] },
+        { rowIndex: 1, row: empty5(), selection: [0] },
+      ]),
+    ).toMatchObject({ ok: false, code: "NOT_CONSECUTIVE" });
+  });
+
+  it("rejects blocks in non-adjacent rows", () => {
+    // rows 0 and 2 aligned but row 1 between them is empty
+    expect(
+      validateRows([
+        { rowIndex: 0, row: empty5(), selection: [1, 2] },
+        { rowIndex: 2, row: empty5(), selection: [1, 2] },
+      ]),
+    ).toMatchObject({ ok: false, code: "NOT_CONSECUTIVE" });
   });
 
   it("ignores rows with no selection", () => {
     expect(
       validateRows([
-        { row: empty10(), selection: [] },
-        { row: empty10(), selection: [3, 4] },
+        { rowIndex: 0, row: empty5(), selection: [] },
+        { rowIndex: 1, row: empty5(), selection: [3, 4] },
       ]),
     ).toEqual({ ok: true });
   });
 
-  it("rejects when any row's run is not consecutive", () => {
+  it("rejects when a row's own run is not consecutive", () => {
     expect(
       validateRows([
-        { row: empty10(), selection: [0, 1] },
-        { row: empty10(), selection: [4, 6] },
+        { rowIndex: 0, row: empty5(), selection: [0, 1] },
+        { rowIndex: 1, row: empty5(), selection: [0, 2] },
       ]),
     ).toMatchObject({ ok: false, code: "NOT_CONSECUTIVE" });
   });
 
-  it("rejects when any row traps a single seat", () => {
-    // row 2: seats 1,2 booked, select 4,5 -> traps seat 3
-    const trapRow: SeatState[] = ["booked", "booked", ...Array(8).fill("available")];
+  it("rejects when a row traps a single seat", () => {
+    const trapRow: SeatState[] = ["booked", "booked", "available", "available", "available"];
     expect(
       validateRows([
-        { row: empty10(), selection: [0, 1] },
-        { row: trapRow, selection: [3, 4] },
+        { rowIndex: 0, row: empty5(), selection: [0, 1] },
+        { rowIndex: 1, row: trapRow, selection: [3, 4] },
       ]),
     ).toMatchObject({ ok: false, code: "ISOLATED_SEAT" });
   });
@@ -188,8 +218,8 @@ describe("validateRows — multi-row selection", () => {
   it("rejects an entirely empty multi-row selection", () => {
     expect(
       validateRows([
-        { row: empty10(), selection: [] },
-        { row: empty10(), selection: [] },
+        { rowIndex: 0, row: empty5(), selection: [] },
+        { rowIndex: 1, row: empty5(), selection: [] },
       ]),
     ).toMatchObject({ ok: false, code: "EMPTY_SELECTION" });
   });
