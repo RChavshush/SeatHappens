@@ -43,11 +43,15 @@ export const createRealtime = (
     const initial = (socket.handshake.auth as { screeningId?: unknown }).screeningId;
     if (typeof initial === "string") socket.join(roomFor(initial));
 
-    socket.on("subscribe", (screeningId: unknown) => {
+    socket.on("screening:subscribe", (payload: unknown, ack?: () => void) => {
+      const screeningId = (payload as { screeningId?: unknown })?.screeningId;
       if (typeof screeningId === "string") socket.join(roomFor(screeningId));
+      ack?.();
     });
-    socket.on("unsubscribe", (screeningId: unknown) => {
+    socket.on("screening:unsubscribe", (payload: unknown, ack?: () => void) => {
+      const screeningId = (payload as { screeningId?: unknown })?.screeningId;
       if (typeof screeningId === "string") socket.leave(roomFor(screeningId));
+      ack?.();
     });
   });
 

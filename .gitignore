@@ -9,3 +9,4 @@ coverage/
 
 # Prisma generated client
 packages/server/src/generated/
+.claude/

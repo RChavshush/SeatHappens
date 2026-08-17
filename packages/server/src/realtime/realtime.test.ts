@@ -59,9 +59,12 @@ describe("realtime", () => {
     const socket = ioClient(url, {
       transports: ["websocket"],
       reconnection: false,
-      auth: { token: user.token, screeningId: SEED_SCREENING_ID },
+      auth: { token: user.token },
     });
     await waitForConnect(socket);
+    await new Promise<void>((resolve) =>
+      socket.emit("screening:subscribe", { screeningId: SEED_SCREENING_ID }, () => resolve()),
+    );
 
     const seat = (await seatIdsForRow("L"))[0]!;
     const event = new Promise<SeatsUpdatedEvent>((resolve) => {
