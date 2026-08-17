@@ -8,14 +8,26 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "db:seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@cinema/shared": "*",
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
     "http-errors": "^2.0.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/http-errors": "^2.0.4",
+    "prisma": "^6.19.3",
+    "prisma-erd-generator": "^2.4.4",
     "tsx": "^4.19.0",
     "vitest": "^2.1.0"
   }

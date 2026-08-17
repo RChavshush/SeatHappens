@@ -37,6 +37,19 @@ export type ErrorResponse = z.infer<typeof errorResponseSchema>;
 
 export type SeatsUpdatedEvent = z.infer<typeof seatsUpdatedEventSchema>;
 
+export interface LayoutSectionConfig {
+  section: SeatSection;
+  rows: number;
+  seatsPerRow: number;
+}
+
+export interface SeatBlueprint {
+  rowLabel: string;
+  rowIndex: number;
+  seatNumber: number;
+  section: SeatSection;
+}
+
 export type RuleErrorCode =
   | "EMPTY_SELECTION"
   | "OUT_OF_RANGE"

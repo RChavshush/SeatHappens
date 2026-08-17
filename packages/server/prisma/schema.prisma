@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../../../docs/erd.md"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum HoldStatus {
+  active
+  confirmed
+  cancelled
+  expired
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String   @map("display_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  holds        SeatHold[]
+  reservations Reservation[]
+
+  @@map("users")
+}
+
+model Movie {
+  id              String @id @default(cuid())
+  title           String
+  durationMinutes Int    @map("duration_minutes")
+
+  screenings Screening[]
+
+  @@map("movies")
+}
+
+model Screening {
+  id       String   @id @default(cuid())
+  movieId  String   @map("movie_id")
+  startsAt DateTime @unique @map("starts_at")
+
+  movie        Movie         @relation(fields: [movieId], references: [id])
+  holds        SeatHold[]
+  reservations Reservation[]
+  locks        SeatLock[]
+
+  @@map("screenings")
+}
+
+model Seat {
+  id         String @id @default(cuid())
+  rowLabel   String @map("row_label")
+  rowIndex   Int    @map("row_index")
+  seatNumber Int    @map("seat_number")
+  section    String
+
+  holdSeats        SeatHoldSeat[]
+  locks            SeatLock[]
+  reservationSeats ReservationSeat[]
+
+  @@unique([rowLabel, seatNumber])
+  @@map("seats")
+}
+
+model SeatHold {
+  id          String     @id @default(cuid())
+  screeningId String     @map("screening_id")
+  userId      String     @map("user_id")
+  status      HoldStatus
+  createdAt   DateTime   @default(now()) @map("created_at")
+  expiresAt   DateTime   @map("expires_at")
+
+  screening   Screening      @relation(fields: [screeningId], references: [id])
+  user        User           @relation(fields: [userId], references: [id])
+  holdSeats   SeatHoldSeat[]
+  locks       SeatLock[]
+  reservation Reservation?
+
+  @@map("seat_holds")
+}
+
+model SeatHoldSeat {
+  holdId      String @map("hold_id")
+  seatId      String @map("seat_id")
+  screeningId String @map("screening_id")
+
+  hold SeatHold @relation(fields: [holdId], references: [id], onDelete: Cascade)
+  seat Seat     @relation(fields: [seatId], references: [id])
+
+  @@id([holdId, seatId])
+  @@map("seat_hold_seats")
+}
+
+model SeatLock {
+  screeningId String   @map("screening_id")
+  seatId      String   @map("seat_id")
+  holdId      String   @map("hold_id")
+  expiresAt   DateTime @map("expires_at")
+
+  screening Screening @relation(fields: [screeningId], references: [id])
+  seat      Seat      @relation(fields: [seatId], references: [id])
+  hold      SeatHold  @relation(fields: [holdId], references: [id], onDelete: Cascade)
+
+  @@id([screeningId, seatId])
+  @@map("seat_locks")
+}
+
+model Reservation {
+  id            String   @id @default(cuid())
+  screeningId   String   @map("screening_id")
+  userId        String   @map("user_id")
+  holdId        String   @unique @map("hold_id")
+  referenceCode String   @unique @map("reference_code")
+  confirmedAt   DateTime @default(now()) @map("confirmed_at")
+
+  screening Screening         @relation(fields: [screeningId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+  hold      SeatHold          @relation(fields: [holdId], references: [id])
+  seats     ReservationSeat[]
+
+  @@map("reservations")
+}
+
+model ReservationSeat {
+  reservationId String @map("reservation_id")
+  seatId        String @map("seat_id")
+  screeningId   String @map("screening_id")
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  seat        Seat        @relation(fields: [seatId], references: [id])
+
+  @@id([reservationId, seatId])
+  @@unique([screeningId, seatId])
+  @@map("reservation_seats")
+}
