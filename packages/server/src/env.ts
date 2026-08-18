@@ -6,6 +6,7 @@ export const envSchema = z.object({
   JWT_SECRET: z.string().min(1),
   JWT_EXPIRES_IN: z.string().min(1).default("1h"),
   HOLD_DURATION_MINUTES: z.coerce.number().int().positive().default(15),
+  REDIS_URL: z.string().url(),
   CLIENT_ORIGIN: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   SERVER_PORT: z.coerce.number().int().positive().default(4000),

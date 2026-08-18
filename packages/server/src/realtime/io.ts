@@ -1,4 +1,6 @@
 import type { Server as HttpServer } from "node:http";
+import { createAdapter } from "@socket.io/redis-adapter";
+import type { Redis } from "ioredis";
 import { Server } from "socket.io";
 import { SOCKET_EVENTS } from "@cinema/shared";
 import type { SeatsUpdatedEvent } from "@cinema/shared";
@@ -20,6 +22,7 @@ const readCookie = (header: string | undefined, name: string): string | null => 
 
 export const createRealtime = (
   server: HttpServer,
+  adapterClients?: { pub: Redis; sub: Redis },
 ): Server<Record<string, never>, Record<string, never>, Record<string, never>, SocketData> => {
   const io = new Server<
     Record<string, never>,
@@ -27,6 +30,10 @@ export const createRealtime = (
     Record<string, never>,
     SocketData
   >(server, { cors: { origin: env.CLIENT_ORIGIN, credentials: true } });
+
+  if (adapterClients) {
+    io.adapter(createAdapter(adapterClients.pub, adapterClients.sub));
+  }
 
   io.use((socket, next) => {
     const token = readCookie(socket.handshake.headers.cookie, AUTH_COOKIE_NAME);

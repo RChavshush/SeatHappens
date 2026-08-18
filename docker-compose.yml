@@ -15,6 +15,17 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--notify-keyspace-events", "Ex"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   server:
     build:
       context: .
@@ -22,6 +33,8 @@ services:
     env_file: .env
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"

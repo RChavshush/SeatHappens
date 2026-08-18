@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import type { Redis } from "ioredis";
 import type { Hold, Reservation, SeatsUpdatedEvent, User } from "@cinema/shared";
 import type { envSchema } from "./env.js";
 import type { Prisma } from "./generated/prisma/index.js";
@@ -10,6 +11,18 @@ export type Tx = Prisma.TransactionClient;
 export type SeatDelta = SeatsUpdatedEvent["seats"][number];
 
 export type SeatBroadcaster = (screeningId: string, seats: SeatDelta[]) => void;
+
+export interface RedisClients {
+  commands: Redis;
+  adapterPub: Redis;
+  adapterSub: Redis;
+  keyspaceSub: Redis;
+}
+
+export interface HoldExpiryScheduler {
+  schedule: (holdId: string, expiresAt: Date) => Promise<void>;
+  cancel: (holdId: string) => Promise<void>;
+}
 
 export interface SocketData {
   user: AuthUserContext;
