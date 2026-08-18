@@ -2,6 +2,11 @@
   <img src="docs/logo.svg" width="76" alt="SeatHappens logo" />
   <h1>SeatHappens</h1>
   <p><em>Seat happens. Pick yours.</em></p>
+  <p>
+    <a href="https://seat-happens.help/">
+      <img src="https://img.shields.io/badge/Live%20demo-seat--happens.help-e50914?style=for-the-badge&labelColor=0a0a0b" alt="Live demo at seat-happens.help" />
+    </a>
+  </p>
 </div>
 
 A full-stack cinema seat-reservation app. Sign in, browse screenings, hold seats
