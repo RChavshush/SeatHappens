@@ -50,7 +50,7 @@ describe("releaseHoldById", () => {
 
     const held = await request(app)
       .post(`/screenings/${SEED_SCREENING_ID}/holds`)
-      .auth(user.token, { type: "bearer" })
+      .set("Cookie", user.cookie)
       .send({ seatIds: [seat] });
     expect(held.status).toBe(201);
     await prisma.seatLock.deleteMany({ where: { holdId: held.body.id } });
