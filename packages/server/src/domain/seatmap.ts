@@ -1,4 +1,5 @@
 import createError from "http-errors";
+import { ERROR_CODE, SEAT_STATE } from "@cinema/shared";
 import type { SeatMap, SeatMapRow, SeatSection, SeatState, SeatView } from "@cinema/shared";
 import { prisma } from "../db.js";
 import type { AuthUserContext } from "../types.js";
@@ -9,7 +10,7 @@ export const buildSeatMap = async (
 ): Promise<SeatMap> => {
   const screening = await prisma.screening.findUnique({ where: { id: screeningId } });
   if (!screening) {
-    throw createError(404, "Screening not found", { code: "SCREENING_NOT_FOUND" });
+    throw createError(404, "Screening not found", { code: ERROR_CODE.SCREENING_NOT_FOUND });
   }
 
   const [seats, reservationSeats, locks] = await Promise.all([
@@ -26,16 +27,16 @@ export const buildSeatMap = async (
 
   const rowsByLabel = new Map<string, SeatMapRow>();
   for (const seat of seats) {
-    let status: SeatState = "available";
+    let status: SeatState = SEAT_STATE.available;
     let heldByMe = false;
     let holdExpiresAt: string | null = null;
 
     if (bookedSeatIds.has(seat.id)) {
-      status = "booked";
+      status = SEAT_STATE.booked;
     } else {
       const lock = lockBySeatId.get(seat.id);
       if (lock) {
-        status = "held";
+        status = SEAT_STATE.held;
         heldByMe = lock.hold.userId === viewer.id;
         holdExpiresAt = lock.expiresAt.toISOString();
       }

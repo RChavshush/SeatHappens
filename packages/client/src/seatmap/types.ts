@@ -1,6 +1,7 @@
 import type { SeatView } from "@cinema/shared";
+import type { SEAT_VARIANT } from "./variants";
 
-export type SeatVariant = "available" | "held" | "mine" | "booked" | "selected";
+export type SeatVariant = (typeof SEAT_VARIANT)[keyof typeof SEAT_VARIANT];
 
 export interface SeatEvaluation {
   disabled: boolean;

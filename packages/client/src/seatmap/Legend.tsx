@@ -1,8 +1,8 @@
 import { cx } from "../lib/cx";
 import { seatClasses, variantLabel } from "./seatClasses";
-import type { SeatVariant } from "./types";
+import { SEAT_VARIANT } from "./variants";
 
-const LEGEND: SeatVariant[] = ["available", "held", "mine", "booked", "selected"];
+const LEGEND = Object.values(SEAT_VARIANT);
 
 export const Legend = () => (
   <ul className="flex flex-wrap gap-2 text-sm text-neutral-300">

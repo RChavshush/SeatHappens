@@ -1,4 +1,4 @@
-import { errorResponseSchema } from "@cinema/shared";
+import { ERROR_CODE, errorResponseSchema } from "@cinema/shared";
 import { env } from "../env";
 import { getToken } from "../auth/storage";
 import { notifyUnauthorized } from "./authEvents";
@@ -20,7 +20,7 @@ export const apiFetch = async <T>(
       notifyUnauthorized();
     }
     const parsed = errorResponseSchema.safeParse(await readJson(response));
-    const code = parsed.success ? parsed.data.code : "UNKNOWN";
+    const code = parsed.success ? parsed.data.code : ERROR_CODE.UNKNOWN;
     const message = parsed.success ? parsed.data.message : response.statusText;
     throw new ApiError(response.status, code, message);
   }

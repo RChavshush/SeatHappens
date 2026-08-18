@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { isHttpError } from "http-errors";
+import { ERROR_CODE } from "@cinema/shared";
 import type { ErrorResponse } from "@cinema/shared";
 
 export const errorHandler = (
@@ -11,7 +12,7 @@ export const errorHandler = (
   if (isHttpError(err)) {
     const extra = err as { code?: unknown; details?: unknown };
     const body: ErrorResponse = {
-      code: typeof extra.code === "string" ? extra.code : "ERROR",
+      code: typeof extra.code === "string" ? extra.code : ERROR_CODE.ERROR,
       message: err.message,
     };
     if (extra.details !== undefined) body.details = extra.details;
@@ -20,6 +21,6 @@ export const errorHandler = (
   }
 
   console.error(err);
-  const body: ErrorResponse = { code: "INTERNAL", message: "Internal server error" };
+  const body: ErrorResponse = { code: ERROR_CODE.INTERNAL, message: "Internal server error" };
   res.status(500).json(body);
 };

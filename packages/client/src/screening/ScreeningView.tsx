@@ -4,6 +4,7 @@ import type { SeatView } from "@cinema/shared";
 import { confirmHold, createHold, getMyHold, releaseHold } from "../api/holds";
 import { getSeatMap, listScreenings } from "../api/screenings";
 import { useAuth } from "../auth/AuthContext";
+import { HOLD_ACTION_KIND } from "../hold/actionKinds";
 import { HoldPanel } from "../hold/HoldPanel";
 import { reconcileHold } from "../hold/reconcile";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
@@ -12,6 +13,7 @@ import { SeatMap } from "../seatmap/SeatMap";
 import { labelForSeats, nextSelection, selectedSeatIds } from "../seatmap/selection";
 import { useSeatUpdates } from "../socket/useSeatUpdates";
 import { useErrorToast, useToasts } from "../toast/ToastContext";
+import { TOAST_TONE } from "../toast/tones";
 
 const HOLD_DEBOUNCE_MS = 400;
 
@@ -75,7 +77,7 @@ export const ScreeningView = () => {
       queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), null);
       setSelected(new Set());
       invalidateSeatMap();
-      push("success", `You're in! Seats locked, reference ${reservation.referenceCode}. 🍿`);
+      push(TOAST_TONE.success, `You're in! Seats locked, reference ${reservation.referenceCode}. 🍿`);
     },
     onError: (error) => {
       showError(error);
@@ -98,7 +100,7 @@ export const ScreeningView = () => {
     queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), null);
     setSelected(new Set());
     invalidateSeatMap();
-    push("info", "Hold expired — the seats slipped back into the wild. 🦌");
+    push(TOAST_TONE.info, "Hold expired — the seats slipped back into the wild. 🦌");
   }, [queryClient, invalidateSeatMap, push]);
 
   const seededRef = useRef(false);
@@ -120,8 +122,8 @@ export const ScreeningView = () => {
       target.length === current.length && target.every((id, i) => id === current[i]);
     if (!settled) return;
     const action = reconcileHold(target, hold);
-    if (action.kind === "create") createMutation.mutate(action.seatIds);
-    else if (action.kind === "release") releaseMutation.mutate(action.holdId);
+    if (action.kind === HOLD_ACTION_KIND.create) createMutation.mutate(action.seatIds);
+    else if (action.kind === HOLD_ACTION_KIND.release) releaseMutation.mutate(action.holdId);
   }, [debouncedSelected, selected, hold, seatMap, mutating, createMutation, releaseMutation]);
 
   if (screeningsQuery.isPending || seatMapQuery.isPending) {

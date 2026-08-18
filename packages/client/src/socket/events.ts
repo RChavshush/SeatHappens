@@ -1,4 +1,1 @@
-export const SOCKET_EVENTS = {
-  subscribe: "screening:subscribe",
-  seatsUpdated: "seats:updated",
-} as const;
+export { SOCKET_EVENTS } from "@cinema/shared";

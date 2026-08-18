@@ -1,3 +1,4 @@
+import { SEAT_STATE } from "@cinema/shared";
 import type { SeatMap, SeatsUpdatedEvent } from "@cinema/shared";
 
 export const applySeatsUpdate = (
@@ -19,7 +20,7 @@ export const applySeatsUpdate = (
           ...seat,
           status: update.status,
           holdExpiresAt: update.holdExpiresAt,
-          heldByMe: update.status === "held" && mine.has(seat.id),
+          heldByMe: update.status === SEAT_STATE.held && mine.has(seat.id),
         };
       }),
     })),

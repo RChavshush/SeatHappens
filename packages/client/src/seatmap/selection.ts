@@ -1,15 +1,16 @@
-import { isOccupied, validateRows } from "@cinema/shared";
+import { SEAT_STATE, isOccupied, validateRows } from "@cinema/shared";
 import type { RowSelection, SeatMap, SeatView } from "@cinema/shared";
 import type { SeatEvaluation, SeatVariant } from "./types";
+import { SEAT_VARIANT } from "./variants";
 
 export const seatVariant = (seat: SeatView): SeatVariant =>
-  seat.status === "booked"
-    ? "booked"
-    : seat.status === "held"
+  seat.status === SEAT_STATE.booked
+    ? SEAT_VARIANT.booked
+    : seat.status === SEAT_STATE.held
       ? seat.heldByMe
-        ? "mine"
-        : "held"
-      : "available";
+        ? SEAT_VARIANT.mine
+        : SEAT_VARIANT.held
+      : SEAT_VARIANT.available;
 
 const buildRowSelections = (
   seatMap: SeatMap,
@@ -17,7 +18,7 @@ const buildRowSelections = (
 ): RowSelection[] =>
   seatMap.rows.map((row, rowIndex) => ({
     rowIndex,
-    row: row.seats.map((seat) => (seat.heldByMe ? "available" : seat.status)),
+    row: row.seats.map((seat) => (seat.heldByMe ? SEAT_STATE.available : seat.status)),
     selection: row.seats.flatMap((seat, index) =>
       selectedIds.has(seat.id) ? [index] : [],
     ),

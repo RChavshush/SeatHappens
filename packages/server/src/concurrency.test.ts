@@ -1,5 +1,6 @@
 import request from "supertest";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { HOLD_STATUS } from "@cinema/shared";
 import { prisma } from "./db.js";
 import { buildApp } from "./http/app.js";
 import {
@@ -96,7 +97,7 @@ describe("concurrency", () => {
 
     const makeHold = async (userId: string): Promise<string> => {
       const hold = await prisma.seatHold.create({
-        data: { screeningId: SEED_SCREENING_ID, userId, status: "active", expiresAt },
+        data: { screeningId: SEED_SCREENING_ID, userId, status: HOLD_STATUS.active, expiresAt },
       });
       await prisma.seatHoldSeat.create({
         data: { holdId: hold.id, seatId: seat, screeningId: SEED_SCREENING_ID },

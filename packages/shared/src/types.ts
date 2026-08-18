@@ -1,5 +1,8 @@
 import type { z } from "zod";
-import type { SEAT_SECTIONS, SEAT_STATES } from "./seats.js";
+import type { ERROR_CODE } from "./errorCodes.js";
+import type { HOLD_STATUS } from "./holdStatus.js";
+import type { RULE_ERROR_CODE } from "./ruleErrorCodes.js";
+import type { SEAT_SECTIONS, SEAT_STATE } from "./seats.js";
 import type {
   authResponseSchema,
   createHoldRequestSchema,
@@ -16,8 +19,11 @@ import type {
   userSchema,
 } from "./schemas.js";
 
-export type SeatState = (typeof SEAT_STATES)[number];
+export type SeatState = (typeof SEAT_STATE)[keyof typeof SEAT_STATE];
 export type SeatSection = (typeof SEAT_SECTIONS)[number];
+
+export type HoldStatus = (typeof HOLD_STATUS)[keyof typeof HOLD_STATUS];
+export type ErrorCode = (typeof ERROR_CODE)[keyof typeof ERROR_CODE];
 
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
@@ -56,13 +62,7 @@ export interface RowSelection {
   selection: number[];
 }
 
-export type RuleErrorCode =
-  | "EMPTY_SELECTION"
-  | "OUT_OF_RANGE"
-  | "DUPLICATE_SEAT"
-  | "SEAT_UNAVAILABLE"
-  | "NOT_CONSECUTIVE"
-  | "ISOLATED_SEAT";
+export type RuleErrorCode = (typeof RULE_ERROR_CODE)[keyof typeof RULE_ERROR_CODE];
 
 export type ValidationResult =
   | { ok: true }

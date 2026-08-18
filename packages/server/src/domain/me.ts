@@ -1,3 +1,4 @@
+import { HOLD_STATUS } from "@cinema/shared";
 import type { Hold, Reservation } from "@cinema/shared";
 import { prisma } from "../db.js";
 
@@ -6,7 +7,7 @@ export const getCurrentHold = async (
   screeningId: string,
 ): Promise<Hold | null> => {
   const hold = await prisma.seatHold.findFirst({
-    where: { userId, screeningId, status: "active", expiresAt: { gt: new Date() } },
+    where: { userId, screeningId, status: HOLD_STATUS.active, expiresAt: { gt: new Date() } },
     include: { holdSeats: { select: { seatId: true } } },
   });
   if (!hold) return null;
@@ -15,7 +16,7 @@ export const getCurrentHold = async (
     screeningId: hold.screeningId,
     seatIds: hold.holdSeats.map((s) => s.seatId),
     expiresAt: hold.expiresAt.toISOString(),
-    status: "active",
+    status: HOLD_STATUS.active,
   };
 };
 

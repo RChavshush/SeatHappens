@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { ApiError } from "../api/errors";
+import { TOAST_TONE } from "./tones";
 import type { Toast, ToastContextValue, ToastTone } from "./types";
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -43,7 +44,7 @@ export const useErrorToast = (): ((error: unknown) => void) => {
     (error: unknown) => {
       const message =
         error instanceof ApiError ? error.message : "Something went wrong.";
-      push("error", message);
+      push(TOAST_TONE.error, message);
     },
     [push],
   );
