@@ -17,6 +17,7 @@ import type {
 import { prisma } from "../db.js";
 import { runSerializable, isUniqueViolation } from "../db-tx.js";
 import { env } from "../env.js";
+import { cancelHoldExpiry, scheduleHoldExpiry } from "../holdExpiry.js";
 import type { ConfirmResult, HoldMutationResult, ReleaseResult, Tx } from "../types.js";
 
 const mapRuleError = (code: RuleErrorCode, message: string): HttpError => {
@@ -40,8 +41,8 @@ export const createHold = async (
   screeningId: string,
   userId: string,
   seatIds: string[],
-): Promise<HoldMutationResult> =>
-  runSerializable(async (tx) => {
+): Promise<HoldMutationResult> => {
+  const { result, cancelledHoldId } = await runSerializable(async (tx) => {
     const clock = await tx.$queryRaw<{ now: Date; expiresAt: Date }[]>`
       SELECT now() AS "now",
              now() + (${env.HOLD_DURATION_MINUTES}::int * interval '1 minute') AS "expiresAt"`;
@@ -50,6 +51,7 @@ export const createHold = async (
     await sweepExpired(tx, screeningId);
 
     const releasedSeatIds: string[] = [];
+    let cancelledHoldId: string | null = null;
     const own = await tx.seatHold.findFirst({
       where: { screeningId, userId, status: HOLD_STATUS.active, expiresAt: { gt: dbNow } },
       select: { id: true },
@@ -65,6 +67,7 @@ export const createHold = async (
       );
       await tx.seatLock.deleteMany({ where: { holdId: own.id } });
       await tx.seatHold.update({ where: { id: own.id }, data: { status: HOLD_STATUS.cancelled } });
+      cancelledHoldId = own.id;
     }
 
     const selected = await tx.seat.findMany({
@@ -134,15 +137,18 @@ export const createHold = async (
         data: seatIds.map((seatId) => ({ screeningId, seatId, holdId: hold.id, expiresAt })),
       });
       return {
-        hold: {
-          id: hold.id,
-          screeningId,
-          seatIds,
-          expiresAt: expiresAt.toISOString(),
-          status: HOLD_STATUS.active,
+        result: {
+          hold: {
+            id: hold.id,
+            screeningId,
+            seatIds,
+            expiresAt: expiresAt.toISOString(),
+            status: HOLD_STATUS.active,
+          },
+          heldSeatIds: seatIds,
+          releasedSeatIds,
         },
-        heldSeatIds: seatIds,
-        releasedSeatIds,
+        cancelledHoldId,
       };
     } catch (error) {
       if (isUniqueViolation(error)) {
@@ -153,6 +159,11 @@ export const createHold = async (
       throw error;
     }
   });
+
+  if (cancelledHoldId) await cancelHoldExpiry(cancelledHoldId);
+  await scheduleHoldExpiry(result.hold.id, new Date(result.hold.expiresAt));
+  return result;
+};
 
 const loadReservation = async (
   tx: Tx,
@@ -176,8 +187,8 @@ const loadReservation = async (
   };
 };
 
-export const confirmHold = async (holdId: string, userId: string): Promise<ConfirmResult> =>
-  prisma.$transaction(async (tx) => {
+export const confirmHold = async (holdId: string, userId: string): Promise<ConfirmResult> => {
+  const result = await prisma.$transaction(async (tx) => {
     const rows = await tx.$queryRaw<
       { screeningId: string; status: string; expired: boolean }[]
     >`
@@ -243,8 +254,12 @@ export const confirmHold = async (holdId: string, userId: string): Promise<Confi
     }
   });
 
-export const releaseHold = async (holdId: string, userId: string): Promise<ReleaseResult> =>
-  prisma.$transaction(async (tx) => {
+  await cancelHoldExpiry(holdId);
+  return result;
+};
+
+export const releaseHold = async (holdId: string, userId: string): Promise<ReleaseResult> => {
+  const result = await prisma.$transaction(async (tx) => {
     const hold = await tx.seatHold.findFirst({
       where: { id: holdId, userId },
       select: { id: true, screeningId: true, status: true },
@@ -270,3 +285,7 @@ export const releaseHold = async (holdId: string, userId: string): Promise<Relea
 
     return { screeningId: hold.screeningId, releasedSeatIds: locks.map((l) => l.seatId) };
   });
+
+  await cancelHoldExpiry(holdId);
+  return result;
+};
