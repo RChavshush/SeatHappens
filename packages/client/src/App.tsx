@@ -3,9 +3,9 @@ import { AuthScreen } from "./auth/AuthScreen";
 import { ScreeningView } from "./screening/ScreeningView";
 
 export const App = () => {
-  const { user, token, signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
-  if (!token || !user) return <AuthScreen />;
+  if (!user) return <AuthScreen />;
 
   return (
     <div className="flex min-h-full flex-col">

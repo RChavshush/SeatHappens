@@ -8,6 +8,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import type { AuthResponse } from "@cinema/shared";
+import { logout } from "../api/auth";
 import { setUnauthorizedHandler } from "../api/authEvents";
 import type { AuthContextValue, AuthState } from "./types";
 import { clearAuth, loadAuth, saveAuth } from "./storage";
@@ -19,12 +20,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = useCallback((auth: AuthResponse) => {
     saveAuth(auth);
-    setState({ user: auth.user, token: auth.token });
+    setState({ user: auth.user });
   }, []);
 
   const signOut = useCallback(() => {
+    void logout().catch(() => {});
     clearAuth();
-    setState({ user: null, token: null });
+    setState({ user: null });
   }, []);
 
   useEffect(() => {
