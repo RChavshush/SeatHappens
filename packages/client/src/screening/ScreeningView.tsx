@@ -125,7 +125,7 @@ export const ScreeningView = () => {
   }, [debouncedSelected, selected, hold, seatMap, mutating, createMutation, releaseMutation]);
 
   if (screeningsQuery.isPending || seatMapQuery.isPending) {
-    return <p className="text-slate-400">Rolling the seat map…</p>;
+    return <p className="text-neutral-400">Rolling the seat map…</p>;
   }
   if (screeningsQuery.isError || !screeningId) {
     return <p className="text-red-400">Could not load screenings.</p>;
@@ -152,15 +152,15 @@ export const ScreeningView = () => {
             onExpire={onExpire}
           />
         ) : (
-          <aside className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-900/70 p-5 shadow-lg shadow-black/20 backdrop-blur">
-            <h2 className="text-lg font-semibold text-slate-100">Pick your spot</h2>
-            <p className="text-sm leading-relaxed text-slate-300">
+          <aside className="space-y-3 rounded-2xl border border-neutral-800 bg-neutral-950/80 p-5 shadow-lg shadow-black/40 backdrop-blur">
+            <h2 className="text-lg font-black uppercase tracking-tight text-white">Pick your spot</h2>
+            <p className="text-sm leading-relaxed text-neutral-400">
               {selectedIds.length === 0 ? (
                 "Tap a seat — or a whole row of them. We don't judge. Sit with your people; blocks can span rows as long as they stay connected."
               ) : (
                 <>
-                  <span className="text-slate-400">Reserving: </span>
-                  <span className="font-medium text-slate-100">
+                  <span className="text-neutral-500">Reserving: </span>
+                  <span className="font-bold text-marquee">
                     {labelForSeats(seatMap, selectedIds).join(", ")}
                   </span>
                 </>
@@ -168,18 +168,18 @@ export const ScreeningView = () => {
             </p>
             <p
               aria-live="polite"
-              className="flex items-center gap-2 text-sm font-medium text-amber-300"
+              className="flex items-center gap-2 text-sm font-medium text-marquee"
             >
               {selectedIds.length === 0 ? (
-                <span className="text-slate-500">Your hold starts the moment you tap. ✨</span>
+                <span className="text-neutral-500">Your hold starts the moment you tap. ✨</span>
               ) : createMutation.isPending ? (
                 <span className="inline-flex items-center gap-2">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-marquee" />
                   Grabbing those seats…
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-amber-400 motion-safe:animate-ping" />
+                  <span className="h-2 w-2 rounded-full bg-marquee motion-safe:animate-ping" />
                   Holding automatically…
                 </span>
               )}

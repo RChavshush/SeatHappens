@@ -55,7 +55,7 @@ export const AuthScreen = () => {
           <div aria-hidden="true" className="text-4xl">
             🎬🍿
           </div>
-          <h1 className="text-gradient-brand mt-2 text-2xl font-bold tracking-tight">
+          <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white">
             The Corner Cinema
           </h1>
           <p className="mt-1 text-sm text-marquee">
@@ -66,9 +66,9 @@ export const AuthScreen = () => {
         <form
           onSubmit={onSubmit}
           noValidate
-          className="space-y-4 rounded-2xl border border-slate-700/70 bg-slate-900/70 p-6 shadow-xl shadow-black/30 backdrop-blur"
+          className="space-y-4 rounded-2xl border border-neutral-800 bg-neutral-950/80 p-6 shadow-xl shadow-black/40 backdrop-blur"
         >
-          <h2 className="text-lg font-semibold text-slate-100">
+          <h2 className="text-lg font-bold text-white">
             {mode === "login" ? "Welcome back" : "Join the club"}
           </h2>
 
@@ -108,7 +108,7 @@ export const AuthScreen = () => {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="w-full rounded-xl bg-gradient-to-r from-fuchsia-600 via-violet-600 to-sky-500 px-4 py-2.5 font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-60"
+            className="w-full rounded-xl bg-marquee px-4 py-2.5 font-bold uppercase tracking-wide text-black transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-marquee focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
           >
             {mutation.isPending
               ? "Rolling the reel…"
@@ -120,7 +120,7 @@ export const AuthScreen = () => {
           <button
             type="button"
             onClick={() => switchMode(mode === "login" ? "register" : "login")}
-            className="w-full text-sm text-slate-400 transition hover:text-slate-200"
+            className="w-full text-sm text-neutral-400 transition hover:text-marquee"
           >
             {mode === "login"
               ? "New here? Create an account"
@@ -143,14 +143,14 @@ interface FieldProps {
 
 const Field = ({ label, type, value, error, autoComplete, onChange }: FieldProps) => (
   <label className="block space-y-1">
-    <span className="text-sm text-slate-300">{label}</span>
+    <span className="text-sm text-neutral-300">{label}</span>
     <input
       type={type}
       value={value}
       autoComplete={autoComplete}
       onChange={(event) => onChange(event.target.value)}
       aria-invalid={error ? true : undefined}
-      className="w-full rounded-md border border-slate-700 bg-slate-800/80 px-3 py-2 text-slate-100 focus:border-fuchsia-500 focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50"
+      className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-marquee focus:outline-none focus:ring-1 focus:ring-marquee/60"
     />
     {error && <span className="text-xs text-red-400">{error}</span>}
   </label>

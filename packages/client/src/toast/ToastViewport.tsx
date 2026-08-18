@@ -5,7 +5,7 @@ import type { ToastTone } from "./types";
 const toneClasses: Record<ToastTone, string> = {
   success: "border-emerald-500/60 bg-emerald-950/90 text-emerald-100",
   error: "border-red-500/60 bg-red-950/90 text-red-100",
-  info: "border-slate-500/60 bg-slate-800/90 text-slate-100",
+  info: "border-neutral-700 bg-neutral-900/90 text-neutral-100",
 };
 
 const toneIcon: Record<ToastTone, string> = {

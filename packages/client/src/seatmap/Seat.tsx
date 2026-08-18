@@ -19,7 +19,7 @@ export const Seat = ({ seat, variant, selected, evaluation, onClick }: SeatProps
       aria-pressed={selected}
       className={cx(
         "h-8 w-8 shrink-0 rounded-t-lg rounded-b-sm text-xs font-medium tabular-nums transition duration-150",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:ring-marquee",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-marquee",
         seatClasses[shown],
         evaluation.disabled && !selected && "cursor-not-allowed opacity-40",
         !evaluation.disabled &&

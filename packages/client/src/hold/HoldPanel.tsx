@@ -33,17 +33,17 @@ export const HoldPanel = ({
   const urgent = remaining <= 60_000;
 
   return (
-    <aside className="space-y-4 rounded-2xl border border-emerald-500/30 bg-slate-900/70 p-5 shadow-lg shadow-emerald-900/20 backdrop-blur">
+    <aside className="space-y-4 rounded-2xl border border-marquee/40 bg-neutral-950/80 p-5 shadow-lg shadow-black/40 backdrop-blur">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-100">Seats on hold</h2>
+        <h2 className="text-lg font-black uppercase tracking-tight text-white">Seats on hold</h2>
         <span aria-hidden="true" className="text-xl">
           🍿
         </span>
       </div>
 
-      <div className="rounded-xl bg-slate-950/50 p-3 text-sm">
-        <p className="text-xs uppercase tracking-wide text-slate-500">Your seats</p>
-        <p className="mt-0.5 font-medium text-emerald-200">{seatLabels.join(", ")}</p>
+      <div className="rounded-xl border border-neutral-800 bg-black/50 p-3 text-sm">
+        <p className="text-xs uppercase tracking-wide text-neutral-500">Your seats</p>
+        <p className="mt-0.5 font-bold text-marquee">{seatLabels.join(", ")}</p>
       </div>
 
       <div
@@ -51,12 +51,12 @@ export const HoldPanel = ({
         className={cx(
           "rounded-xl border p-3 text-sm",
           urgent
-            ? "border-amber-500/40 bg-amber-500/10 text-amber-200"
-            : "border-slate-700/70 bg-slate-950/40 text-slate-300",
+            ? "border-red-500/50 bg-red-500/10 text-red-200"
+            : "border-neutral-800 bg-black/40 text-neutral-300",
         )}
       >
         {urgent ? "Trailers are basically over — decide! " : "Held for you for "}
-        <span className="font-mono text-lg font-bold tabular-nums text-slate-100">
+        <span className="font-mono text-lg font-bold tabular-nums text-white">
           {formatCountdown(remaining)}
         </span>
       </div>
@@ -66,7 +66,7 @@ export const HoldPanel = ({
           type="button"
           onClick={onConfirm}
           disabled={confirming || expired}
-          className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-3 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-900/40 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-60"
+          className="flex-1 rounded-xl bg-marquee px-3 py-2.5 text-sm font-bold uppercase tracking-wide text-black transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-marquee focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
         >
           {confirming ? "Locking it in…" : "Confirm seats"}
         </button>
@@ -74,7 +74,7 @@ export const HoldPanel = ({
           type="button"
           onClick={onRelease}
           disabled={releasing}
-          className="flex-1 rounded-xl border border-slate-600 px-3 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-60"
+          className="flex-1 rounded-xl border border-neutral-700 px-3 py-2.5 text-sm font-semibold text-neutral-200 transition hover:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
         >
           {releasing ? "Letting go…" : "Release"}
         </button>
