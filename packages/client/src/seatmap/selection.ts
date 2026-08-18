@@ -20,7 +20,13 @@ const buildRowSelections = (
 ): RowSelection[] =>
   seatMap.rows.map((row, rowIndex) => ({
     rowIndex,
-    row: row.seats.map((seat) => (seat.heldByMe ? SEAT_STATE.available : seat.status)),
+    // A selected seat is the user's own intent, so treat it as available even if a
+    // realtime seatsUpdated broadcast racing ahead of the hold's HTTP reply has
+    // transiently marked it taken-by-others; otherwise the next seat's validation
+    // fails and its click is swallowed.
+    row: row.seats.map((seat) =>
+      seat.heldByMe || selectedIds.has(seat.id) ? SEAT_STATE.available : seat.status,
+    ),
     selection: row.seats.flatMap((seat, index) =>
       selectedIds.has(seat.id) ? [index] : [],
     ),
