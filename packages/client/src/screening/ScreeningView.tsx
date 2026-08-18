@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SeatView } from "@cinema/shared";
 import { confirmHold, createHold, getMyHold, releaseHold } from "../api/holds";
 import { getSeatMap, listScreenings } from "../api/screenings";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 import { HOLD_ACTION_KIND } from "../hold/actionKinds";
 import { HoldPanel } from "../hold/HoldPanel";
 import { reconcileHold } from "../hold/reconcile";

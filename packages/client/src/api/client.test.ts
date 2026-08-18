@@ -58,4 +58,16 @@ describe("apiFetch", () => {
     await expect(apiFetch("/screenings")).rejects.toBeInstanceOf(ApiError);
     expect(onUnauthorized).not.toHaveBeenCalled();
   });
+
+  it("does not notify on a 401 from the /me identity probe", async () => {
+    stubFetch(jsonResponse(401, { code: "UNAUTHENTICATED", message: "nope" }));
+    await expect(apiFetch("/me")).rejects.toBeInstanceOf(ApiError);
+    expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+
+  it("still notifies on a 401 from a nested /me sub-resource", async () => {
+    stubFetch(jsonResponse(401, { code: "UNAUTHENTICATED", message: "nope" }));
+    await expect(apiFetch("/me/hold?screeningId=x")).rejects.toBeInstanceOf(ApiError);
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+  });
 });

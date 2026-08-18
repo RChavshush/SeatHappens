@@ -7,7 +7,7 @@ import { login, register } from "../api/auth";
 import { ApiError } from "../api/errors";
 import { fieldErrors } from "../lib/formErrors";
 import type { AuthMode, FieldErrors } from "../types";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./useAuth";
 import { AUTH_MODE } from "./modes";
 
 export const AuthScreen = () => {

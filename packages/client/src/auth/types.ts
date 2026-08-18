@@ -1,10 +1,8 @@
 import type { AuthResponse, User } from "@cinema/shared";
 
-export interface AuthState {
+export interface Auth {
   user: User | null;
-}
-
-export interface AuthContextValue extends AuthState {
+  isLoading: boolean;
   signIn: (auth: AuthResponse) => void;
   signOut: () => void;
 }

@@ -17,7 +17,7 @@ export const apiFetch = async <T>(
   });
 
   if (!response.ok) {
-    if (response.status === 401 && !path.startsWith("/auth/")) {
+    if (response.status === 401 && !path.startsWith("/auth/") && path !== "/me") {
       notifyUnauthorized();
     }
     const parsed = errorResponseSchema.safeParse(await readJson(response));
