@@ -74,7 +74,7 @@ The seat-selection validator lives in `shared` and is imported by both the clien
 ```
 users(id, email UNIQUE, password_hash, display_name, created_at)
 
-movies(id, title, duration_minutes)
+movies(id, title, duration_minutes, image_url NULL)
 
 seats(id, row_label, row_index, seat_number, section)
   UNIQUE(row_label, seat_number)
@@ -188,7 +188,10 @@ The three worked examples in the assignment PDF become test cases verbatim.
 POST   /auth/register              { email, password, displayName } -> { token, user }
 POST   /auth/login                 { email, password }              -> { token, user }
 GET    /screenings                                                  -> Screening[]
+POST   /screenings                 { movieId, startsAt }            -> Screening
 GET    /screenings/:id/seatmap                                      -> SeatMap
+GET    /movies                                                     -> Movie[]
+POST   /movies                     { title, durationMinutes, imageUrl? } -> Movie
 POST   /screenings/:id/holds       { seatIds: string[] }            -> Hold
 DELETE /holds/:id                                                   -> 204
 POST   /holds/:id/confirm                                           -> Reservation
@@ -197,6 +200,8 @@ GET    /me/reservations                                             -> Reservati
 ```
 
 `SeatMap` returns rows in display order, each seat carrying `{ id, number, status, heldByMe, holdExpiresAt? }`.
+
+`Screening` carries `{ id, movieId, movieTitle, movieImageUrl, startsAt, durationMinutes, endsAt }`. `endsAt` is computed from `startsAt + durationMinutes` at read time rather than stored, so a movie's duration change never leaves screenings with a stale end time. `Movie` carries `{ id, title, durationMinutes, imageUrl }`. Both `POST /screenings` and `POST /movies` are open to any authenticated user; there is no separate admin role.
 
 Every route except `/auth/*` requires a `Bearer` JWT.
 
@@ -213,11 +218,21 @@ Error codes, mapped to HTTP status by a single middleware:
 | `ISOLATED_SEAT` | 422 | Rule 2 violation |
 | `HOLD_EXPIRED` | 410 | Hold expired before confirmation |
 | `HOLD_NOT_FOUND` | 404 | No such hold for this user |
+| `SCREENING_NOT_FOUND` | 404 | Referenced movie/screening does not exist |
+| `SCREENING_TIME_TAKEN` | 409 | Another screening already starts at that time |
 | `VALIDATION_FAILED` | 422 | Request body failed its Zod schema |
 
 ## 8. Front end
 
-Two screens: an auth screen (login and register) and the seat map.
+Two authenticated views behind the auth screen, switched by a header nav toggle
+(no router dependency): the booking view and an admin view. The booking view
+carries a screening picker — a movie poster header for the selected screening
+plus a "Now showing" dropdown of every screening — and the seat map beneath it;
+selecting a screening re-scopes the seat map, hold panel, and realtime
+subscription to it. The admin view is a form to add a screening (choose an
+existing movie or add a new one with title, duration, and poster URL, plus a
+start time) alongside the list of scheduled screenings. Both views are open to
+any signed-in user.
 
 Server state is managed by TanStack Query. The Socket.IO subscription patches the seat-map query cache on `seats:updated`; a reconnect invalidates it for a full refetch.
 
@@ -253,6 +268,16 @@ Rejected requests surface the typed error code as a human-readable toast.
 
 ## 11. Out of scope
 
-Payment, seat pricing, ticket types, cancellation of confirmed reservations, admin screens, multiple auditoriums, and a showtime picker.
+Payment, seat pricing, ticket types, cancellation of confirmed reservations, a
+dedicated admin role, and multiple auditoriums.
 
-The assignment describes a single seating map, so the system models one auditorium and the client always renders the seeded screening. `Screening` is nonetheless a real entity rather than a constant, because seat state has to be scoped to something — without it, the first full house would end the demo. Growing to multiple auditoriums is an additive migration (section 4); growing to a showtime picker is a screen, not a schema change.
+The assignment describes a single seating map, so the system models one
+auditorium. `Screening` is a real entity rather than a constant, because seat
+state has to be scoped to something — without it, the first full house would end
+the demo. Growing to multiple auditoriums is an additive migration (section 4).
+
+Multiple screenings, a showtime picker, and an admin form to add screenings and
+movies (with poster images) were added after the original brief; see sections 4,
+7, and 8. They deliberately stopped short of a real admin role — creating
+screenings and movies is open to any authenticated user — and of stored end
+times, which are computed from movie duration at read time.

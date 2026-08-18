@@ -7,6 +7,7 @@ import { env } from "../env.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { holdsRouter } from "./routes/holds.js";
 import { meRouter } from "./routes/me.js";
+import { moviesRouter } from "./routes/movies.js";
 import { screeningsRouter } from "./routes/screenings.js";
 
 export const buildApp = (): Express => {
@@ -25,6 +26,7 @@ export const buildApp = (): Express => {
   app.use(authGuard);
 
   app.use("/screenings", screeningsRouter);
+  app.use("/movies", moviesRouter);
   app.use("/holds", holdsRouter);
   app.use("/me", meRouter);
 

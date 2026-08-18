@@ -39,19 +39,40 @@ const main = async () => {
         id: "seed-movie",
         title: "The Grand Premiere",
         durationMinutes: 128,
+        imageUrl:
+          "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&q=80",
       },
     });
 
-    const startsAt = new Date("2026-09-01T19:30:00.000Z");
-    await tx.screening.upsert({
-      where: { startsAt },
+    const matinee = await tx.movie.upsert({
+      where: { id: "seed-movie-matinee" },
       update: {},
-      create: { id: "seed-screening", movieId: movie.id, startsAt },
+      create: {
+        id: "seed-movie-matinee",
+        title: "Midnight in the Reel",
+        durationMinutes: 95,
+        imageUrl:
+          "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=80",
+      },
     });
+
+    const SEED_SCREENINGS = [
+      { id: "seed-screening", movieId: movie.id, startsAt: new Date("2026-09-01T19:30:00.000Z") },
+      { id: "seed-screening-2", movieId: matinee.id, startsAt: new Date("2026-09-01T22:15:00.000Z") },
+      { id: "seed-screening-3", movieId: movie.id, startsAt: new Date("2026-09-02T19:30:00.000Z") },
+    ];
+
+    for (const screening of SEED_SCREENINGS) {
+      await tx.screening.upsert({
+        where: { startsAt: screening.startsAt },
+        update: {},
+        create: screening,
+      });
+    }
   });
 
   const seatCount = await prisma.seat.count();
-  console.log(`Seeded ${seatCount} seats, ${SEED_USERS.length} users, 1 screening.`);
+  console.log(`Seeded ${seatCount} seats, ${SEED_USERS.length} users, 3 screenings.`);
 };
 
 main()

@@ -1,8 +1,32 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { AdminScreen } from "./admin/AdminScreen";
 import { setUnauthorizedHandler } from "./api/authEvents";
 import { useAuth } from "./auth/useAuth";
 import { AuthScreen } from "./auth/AuthScreen";
 import { ScreeningView } from "./screening/ScreeningView";
+
+type View = "book" | "admin";
+
+const NavButton = ({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: string;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-current={active ? "page" : undefined}
+    className={`rounded-md px-3 py-1 font-semibold transition ${
+      active ? "bg-marquee text-black" : "text-neutral-400 hover:text-marquee"
+    }`}
+  >
+    {children}
+  </button>
+);
 
 const LoadingScreen = () => (
   <div className="flex min-h-full items-center justify-center" role="status" aria-live="polite">
@@ -18,6 +42,7 @@ const LoadingScreen = () => (
 
 export const App = () => {
   const { user, isLoading, signOut } = useAuth();
+  const [view, setView] = useState<View>("book");
 
   useEffect(() => {
     setUnauthorizedHandler(signOut);
@@ -44,6 +69,14 @@ export const App = () => {
           </div>
         </div>
         <div className="flex items-center gap-3 text-sm">
+          <nav className="flex items-center gap-1 rounded-lg border border-neutral-800 p-0.5">
+            <NavButton active={view === "book"} onClick={() => setView("book")}>
+              Book
+            </NavButton>
+            <NavButton active={view === "admin"} onClick={() => setView("admin")}>
+              Admin
+            </NavButton>
+          </nav>
           <span className="hidden text-neutral-400 sm:inline">Hey, {user.displayName}</span>
           <button
             type="button"
@@ -55,7 +88,7 @@ export const App = () => {
         </div>
       </header>
       <main className="flex-1 p-4 sm:p-6">
-        <ScreeningView />
+        {view === "book" ? <ScreeningView /> : <AdminScreen />}
       </main>
     </div>
   );

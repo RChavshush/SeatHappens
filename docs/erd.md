@@ -21,6 +21,7 @@ expired expired
     String id "🗝️"
     String title 
     Int duration_minutes 
+    String image_url "❓"
     }
   
 

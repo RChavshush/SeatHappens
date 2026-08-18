@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { createHoldRequestSchema } from "@cinema/shared";
+import { createHoldRequestSchema, createScreeningRequestSchema } from "@cinema/shared";
 import { createHold } from "../../domain/holds.js";
 import { buildSeatMap } from "../../domain/seatmap.js";
-import { listScreenings } from "../../domain/screenings.js";
+import { createScreening, listScreenings } from "../../domain/screenings.js";
 import { availableDeltas, broadcastSeatUpdates, heldDeltas } from "../../realtime/emitter.js";
 import { asyncHandler } from "../async-handler.js";
 import { validate } from "../middleware/validate.js";
@@ -14,6 +14,14 @@ screeningsRouter.get(
   "/",
   asyncHandler(async (_req, res) => {
     res.json(await listScreenings());
+  }),
+);
+
+screeningsRouter.post(
+  "/",
+  validate(createScreeningRequestSchema),
+  asyncHandler(async (req, res) => {
+    res.status(201).json(await createScreening(req.body));
   }),
 );
 

@@ -6,9 +6,12 @@ import type { SEAT_STATE } from "./seats.js";
 import type {
   authResponseSchema,
   createHoldRequestSchema,
+  createMovieRequestSchema,
+  createScreeningRequestSchema,
   errorResponseSchema,
   holdSchema,
   loginRequestSchema,
+  movieSchema,
   registerRequestSchema,
   reservationSchema,
   screeningSchema,
@@ -29,7 +32,10 @@ export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type User = z.infer<typeof userSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
 
+export type Movie = z.infer<typeof movieSchema>;
+export type CreateMovieRequest = z.infer<typeof createMovieRequestSchema>;
 export type Screening = z.infer<typeof screeningSchema>;
+export type CreateScreeningRequest = z.infer<typeof createScreeningRequestSchema>;
 export type SeatView = z.infer<typeof seatViewSchema>;
 export type SeatMapRow = z.infer<typeof seatMapRowSchema>;
 export type SeatMap = z.infer<typeof seatMapSchema>;
