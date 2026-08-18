@@ -34,9 +34,10 @@ model User {
 }
 
 model Movie {
-  id              String @id @default(cuid())
+  id              String  @id @default(cuid())
   title           String
-  durationMinutes Int    @map("duration_minutes")
+  durationMinutes Int     @map("duration_minutes")
+  imageUrl        String? @map("image_url")
 
   screenings Screening[]
 

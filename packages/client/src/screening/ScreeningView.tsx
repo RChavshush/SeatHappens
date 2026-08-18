@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SeatView } from "@cinema/shared";
 import { confirmHold, createHold, getMyHold, releaseHold } from "../api/holds";
 import { getSeatMap, listScreenings } from "../api/screenings";
+import { formatStart } from "../movie/format";
+import { Poster } from "../movie/Poster";
 import { useAuth } from "../auth/useAuth";
 import { HOLD_ACTION_KIND } from "../hold/actionKinds";
 import { HoldPanel } from "../hold/HoldPanel";
@@ -27,7 +29,10 @@ export const ScreeningView = () => {
     queryKey: queryKeys.screenings,
     queryFn: listScreenings,
   });
-  const screeningId = screeningsQuery.data?.[0]?.id;
+  const screenings = screeningsQuery.data ?? [];
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const screeningId = selectedId ?? screenings[0]?.id;
+  const screening = screenings.find((s) => s.id === screeningId);
 
   const seatMapQuery = useQuery({
     queryKey: queryKeys.seatMap(screeningId ?? "none"),
@@ -105,6 +110,11 @@ export const ScreeningView = () => {
 
   const seededRef = useRef(false);
   useEffect(() => {
+    seededRef.current = false;
+    setSelected(new Set());
+  }, [screeningId]);
+
+  useEffect(() => {
     if (seededRef.current || !holdQuery.isSuccess) return;
     seededRef.current = true;
     if (hold) setSelected(new Set(hold.seatIds));
@@ -139,7 +149,42 @@ export const ScreeningView = () => {
   const selectedIds = selectedSeatIds(seatMap, selected);
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <div className="space-y-6">
+      {screening && (
+        <header className="flex items-center gap-4 rounded-2xl border border-neutral-800 bg-neutral-950/80 p-4 shadow-lg shadow-black/40 backdrop-blur">
+          <Poster
+            src={screening.movieImageUrl}
+            alt={screening.movieTitle}
+            className="h-24 w-16"
+          />
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-xl font-black uppercase tracking-tight text-white">
+              {screening.movieTitle}
+            </h2>
+            <p className="text-sm text-neutral-400">
+              {formatStart(screening.startsAt)} · {screening.durationMinutes} min
+            </p>
+          </div>
+          {screenings.length > 1 && (
+            <label className="text-sm text-neutral-400">
+              <span className="mb-1 block">Now showing</span>
+              <select
+                value={screeningId}
+                onChange={(event) => setSelectedId(event.target.value)}
+                className="max-w-[14rem] rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-marquee focus:outline-none focus:ring-1 focus:ring-marquee/60"
+              >
+                {screenings.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.movieTitle} — {formatStart(s.startsAt)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </header>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <SeatMap seatMap={seatMap} selected={selected} onSeatClick={onSeatClick} />
 
       <div>
@@ -188,6 +233,7 @@ export const ScreeningView = () => {
             </p>
           </aside>
         )}
+      </div>
       </div>
     </div>
   );

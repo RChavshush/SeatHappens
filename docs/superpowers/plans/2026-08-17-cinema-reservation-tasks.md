@@ -109,3 +109,17 @@ Task 1  scaffold ──> Task 2  shared ──> everything below
 - `docker compose up`: `db` (postgres:17-alpine + healthcheck), `server` (waits healthy, migrate + seed, start), `client`
 - `.env.example` wired through compose
 - README: setup, run, architecture notes, concurrency trade-off (SERIALIZABLE + retry), ERD link
+
+---
+
+## Post-brief — Multiple screenings + admin
+
+Added after the original brief (see spec sections 4, 7, 8, 11).
+
+### Task 13 — Screening management
+- `movies.image_url` column + migration; `Movie`/`Screening` shared schemas gain
+  `imageUrl`, `movieId`, `durationMinutes`, computed `endsAt`
+- `GET/POST /movies` and `POST /screenings`; duplicate `starts_at` → `409 SCREENING_TIME_TAKEN`
+- Client: header nav toggle (book/admin), admin add-screening form, booking-view
+  screening picker with poster header — both views open to any signed-in user
+- Seed a second movie and extra screenings so the picker is populated

@@ -26,9 +26,31 @@ export const authResponseSchema = z.object({
   user: userSchema,
 });
 
+export const movieSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  durationMinutes: z.number().int().positive(),
+  imageUrl: z.string().nullable(),
+});
+
+export const createMovieRequestSchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  durationMinutes: z.number().int().positive().max(600),
+  imageUrl: z.string().trim().url().optional(),
+});
+
 export const screeningSchema = z.object({
   id: z.string(),
+  movieId: z.string(),
   movieTitle: z.string(),
+  movieImageUrl: z.string().nullable(),
+  startsAt: z.string().datetime(),
+  durationMinutes: z.number().int().positive(),
+  endsAt: z.string().datetime(),
+});
+
+export const createScreeningRequestSchema = z.object({
+  movieId: z.string().min(1),
   startsAt: z.string().datetime(),
 });
 
