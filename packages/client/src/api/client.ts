@@ -1,6 +1,7 @@
 import { errorResponseSchema } from "@cinema/shared";
 import { env } from "../env";
 import { getToken } from "../auth/storage";
+import { notifyUnauthorized } from "./authEvents";
 import { ApiError } from "./errors";
 
 export const apiFetch = async <T>(
@@ -15,6 +16,9 @@ export const apiFetch = async <T>(
   const response = await fetch(`${env.apiUrl}${path}`, { ...options, headers });
 
   if (!response.ok) {
+    if (response.status === 401 && token && !path.startsWith("/auth/")) {
+      notifyUnauthorized();
+    }
     const parsed = errorResponseSchema.safeParse(await readJson(response));
     const code = parsed.success ? parsed.data.code : "UNKNOWN";
     const message = parsed.success ? parsed.data.message : response.statusText;
