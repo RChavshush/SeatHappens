@@ -1,6 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "../db.js";
+import { createHold } from "./holds.js";
 import { buildApp } from "../http/app.js";
 import {
   SEED_SCREENING_ID,
@@ -137,5 +138,28 @@ describe("createHold — no seat-count cap", () => {
     expect(res.status).toBe(201);
     expect(res.body.seatIds).toHaveLength(11);
     await request(app).delete(`/holds/${res.body.id}`).auth(userA.token, { type: "bearer" });
+  });
+});
+
+describe("createHold — extending a hold (broadcast delta)", () => {
+  it("does not report re-held seats as released", async () => {
+    const row = await seatIdsForRow("I"); // a row no other test uses
+    await createHold(SEED_SCREENING_ID, userB.userId, [row[0]!]);
+    const extended = await createHold(SEED_SCREENING_ID, userB.userId, [row[0]!, row[1]!]);
+
+    expect(extended.heldSeatIds).toEqual([row[0], row[1]]);
+    // row[0] was kept in the new selection, so it must NOT be broadcast as released
+    expect(extended.releasedSeatIds).toEqual([]);
+
+    await request(app).delete(`/holds/${extended.hold.id}`).auth(userB.token, { type: "bearer" });
+  });
+
+  it("still releases seats that are genuinely dropped", async () => {
+    const row = await seatIdsForRow("I");
+    await createHold(SEED_SCREENING_ID, userB.userId, [row[2]!, row[3]!]);
+    const moved = await createHold(SEED_SCREENING_ID, userB.userId, [row[5]!, row[6]!]);
+
+    expect(moved.releasedSeatIds.sort()).toEqual([row[2], row[3]].sort());
+    await request(app).delete(`/holds/${moved.hold.id}`).auth(userB.token, { type: "bearer" });
   });
 });

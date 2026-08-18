@@ -53,7 +53,10 @@ export const createHold = async (
         where: { holdId: own.id },
         select: { seatId: true },
       });
-      releasedSeatIds.push(...ownLocks.map((l) => l.seatId));
+      const stillWanted = new Set(seatIds);
+      releasedSeatIds.push(
+        ...ownLocks.map((l) => l.seatId).filter((id) => !stillWanted.has(id)),
+      );
       await tx.seatLock.deleteMany({ where: { holdId: own.id } });
       await tx.seatHold.update({ where: { id: own.id }, data: { status: "cancelled" } });
     }
