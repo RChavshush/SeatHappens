@@ -1,6 +1,6 @@
 import request from "supertest";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { HOLD_STATUS } from "@cinema/shared";
+import { HOLD_STATUS, RULE_ERROR_CODE } from "@cinema/shared";
 import { prisma } from "./db.js";
 import { buildApp } from "./http/app.js";
 import {
@@ -55,6 +55,30 @@ describe("concurrency", () => {
     expect(wins).toBe(1);
     expect(losses).toHaveLength(9);
     expect(losses.every((s) => s === 409)).toBe(true);
+  });
+
+  it("two adjacent holds that would jointly trap a single seat: one is rejected", async () => {
+    const userA = await register("gap-a");
+    const userB = await register("gap-b");
+    const row = await seatIdsForRow("F");
+    const blockAB = [row[2]!, row[3]!];
+    const isolatingSeat = [row[5]!];
+
+    const results = await Promise.all([
+      postHold(userA, blockAB),
+      postHold(userB, isolatingSeat),
+    ]);
+    const statuses = results.map((r) => r.status);
+
+    expect(statuses.filter((s) => s === 201)).toHaveLength(1);
+    const loser = results.find((r) => r.status !== 201)!;
+    expect(loser.status).toBe(422);
+    expect(loser.body.code).toBe(RULE_ERROR_CODE.ISOLATED_SEAT);
+
+    const activeHolds = await prisma.seatHold.count({
+      where: { screeningId: SEED_SCREENING_ID, status: HOLD_STATUS.active },
+    });
+    expect(activeHolds).toBe(1);
   });
 
   it("an expired hold releases its seat to the next requester", async () => {
