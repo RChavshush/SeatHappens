@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="80" height="80">
+  <g fill="#f7e39c" stroke="#e6cf82" stroke-width="0.4">
+    <circle cx="10.5" cy="10" r="3.1"/>
+    <circle cx="16" cy="7.4" r="3.6"/>
+    <circle cx="21.5" cy="10" r="3.1"/>
+    <circle cx="13.5" cy="11.6" r="2.9"/>
+    <circle cx="18.5" cy="11.6" r="2.9"/>
+  </g>
+  <defs><clipPath id="cup"><path d="M8 13H24L22 29H10Z"/></clipPath></defs>
+  <g clip-path="url(#cup)">
+    <rect x="8" y="13" width="16" height="16" fill="#ffffff"/>
+    <rect x="9" y="13" width="2.4" height="16" fill="#e50914"/>
+    <rect x="14" y="13" width="2.4" height="16" fill="#e50914"/>
+    <rect x="19" y="13" width="2.4" height="16" fill="#e50914"/>
+  </g>
+  <path d="M8 13H24L22 29H10Z" fill="none" stroke="#c20510" stroke-width="0.8"/>
+  <rect x="7.4" y="11.5" width="17.2" height="2.7" rx="1.1" fill="#e50914"/>
+</svg>
