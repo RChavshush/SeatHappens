@@ -12,7 +12,7 @@ import { useSeatUpdates } from "../socket/useSeatUpdates";
 import { useErrorToast, useToasts } from "../toast/ToastContext";
 
 export const ScreeningView = () => {
-  const { token } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const { push } = useToasts();
   const showError = useErrorToast();
@@ -32,10 +32,10 @@ export const ScreeningView = () => {
   const holdQuery = useQuery({
     queryKey: queryKeys.myHold(screeningId ?? "none"),
     queryFn: () => getMyHold(screeningId!),
-    enabled: Boolean(token && screeningId),
+    enabled: Boolean(user && screeningId),
   });
 
-  useSeatUpdates(screeningId, token);
+  useSeatUpdates(screeningId, Boolean(user));
 
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const seatMap = seatMapQuery.data;
