@@ -17,3 +17,7 @@ export const register = async (body: RegisterRequest): Promise<AuthResponse> =>
       body: JSON.stringify(body),
     }),
   );
+
+export const logout = async (): Promise<void> => {
+  await apiFetch<void>("/auth/logout", { method: "POST" });
+};
