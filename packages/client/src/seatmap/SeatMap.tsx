@@ -15,17 +15,19 @@ export const SeatMap = ({ seatMap, selected, onSeatClick }: SeatMapProps) => {
       <span className="w-5 shrink-0 text-right text-xs font-semibold text-neutral-500">
         {row.rowLabel}
       </span>
-      {row.seats.map((seat) => (
-        <Seat
-          key={seat.id}
-          seat={seat}
-          variant={seatVariant(seat)}
-          selected={selected.has(seat.id)}
-          evaluation={evaluateSeat(seatMap, seat, selected)}
-          onClick={onSeatClick}
-        />
-      ))}
-    </div>
+      <div className="flex flex-1 justify-center gap-1.5">
+        {row.seats.map((seat) => (
+          <Seat
+            key={seat.id}
+            seat={seat}
+            variant={seatVariant(seat)}
+            selected={selected.has(seat.id)}
+            evaluation={evaluateSeat(seatMap, seat, selected)}
+            onClick={onSeatClick}
+          />
+        ))}
+      </div>
+      <span aria-hidden="true" className="w-5 shrink-0" />
   );
 
   return (
