@@ -65,7 +65,7 @@ const Hero = ({
           <span>{screening.durationMinutes} min</span>
         </div>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-neutral-400">
-          Pick your seat before someone slower does. Seat happens — best make it yours.
+          Pick your seat before someone slower does. Seat happens - best make it yours.
         </p>
         <button
           type="button"
@@ -265,10 +265,10 @@ export const ScreeningView = () => {
     );
   }
   if (screeningsQuery.isError || !screeningId || !screening) {
-    return <p className="text-red-soft">Could not load screenings. Seat happens — try a refresh.</p>;
+    return <p className="text-red-soft">Could not load screenings. Seat happens - try a refresh.</p>;
   }
   if (seatMapQuery.isError || !seatMap) {
-    return <p className="text-red-soft">Could not load the seat map. Seat happens — try again.</p>;
+    return <p className="text-red-soft">Could not load the seat map. Seat happens - try again.</p>;
   }
 
   const selectedIds = selectedSeatIds(seatMap, selected);
@@ -306,7 +306,7 @@ export const ScreeningView = () => {
             <aside className="space-y-3">
               <h2 className="text-lg font-bold tracking-tight text-white">Choose your seat</h2>
               <p className="text-sm leading-relaxed text-neutral-400">
-                Tap a seat — or a whole connected block. Sit with your people; blocks can span rows
+                Tap a seat - or a whole connected block. Sit with your people; blocks can span rows
                 as long as they stay together.
               </p>
               {selectedIds.length > 0 && (

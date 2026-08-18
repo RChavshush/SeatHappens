@@ -52,7 +52,7 @@ export const evaluateSeat = (
         ? "This one's yours already."
         : seat.bookedByMe
           ? "You already booked this seat."
-          : "Taken — too slow.",
+          : "Taken - too slow.",
     };
   }
 

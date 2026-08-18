@@ -56,7 +56,7 @@ export const HoldPanel = ({
       >
         <Icon name="clock" className="h-4 w-4 shrink-0" />
         <span className="min-w-0 flex-1">
-          {urgent ? "Trailers are basically over — decide!" : "Your seat is getting impatient."}
+          {urgent ? "Trailers are basically over - decide!" : "Your seat is getting impatient."}
         </span>
         <span className="font-mono text-base font-bold tabular-nums text-white">
           {formatCountdown(remaining)}
