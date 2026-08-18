@@ -17,7 +17,7 @@ const emails: string[] = [];
 const postHold = (user: TestUser, seatIds: string[]) =>
   request(app)
     .post(`/screenings/${SEED_SCREENING_ID}/holds`)
-    .auth(user.token, { type: "bearer" })
+    .set("Cookie", user.cookie)
     .send({ seatIds });
 
 const register = async (label: string): Promise<TestUser> => {
@@ -48,20 +48,20 @@ describe("confirm and release", () => {
 
     const res = await request(app)
       .post(`/holds/${holdId}/confirm`)
-      .auth(user.token, { type: "bearer" });
+      .set("Cookie", user.cookie);
     expect(res.status).toBe(200);
     expect(res.body.referenceCode).toMatch(/^RSV-/);
     expect(res.body.seatIds).toHaveLength(2);
 
     const list = await request(app)
       .get("/me/reservations")
-      .auth(user.token, { type: "bearer" });
+      .set("Cookie", user.cookie);
     expect(list.body).toHaveLength(1);
     expect(list.body[0].id).toBe(res.body.id);
 
     const map = await request(app)
       .get(`/screenings/${SEED_SCREENING_ID}/seatmap`)
-      .auth(user.token, { type: "bearer" });
+      .set("Cookie", user.cookie);
     const seat = map.body.rows
       .flatMap((r: { seats: { id: string; status: string }[] }) => r.seats)
       .find((s: { id: string }) => s.id === rowB[0]!);
@@ -74,8 +74,8 @@ describe("confirm and release", () => {
     const held = await postHold(user, [rowC[0]!]);
     const holdId = held.body.id;
 
-    const first = await request(app).post(`/holds/${holdId}/confirm`).auth(user.token, { type: "bearer" });
-    const second = await request(app).post(`/holds/${holdId}/confirm`).auth(user.token, { type: "bearer" });
+    const first = await request(app).post(`/holds/${holdId}/confirm`).set("Cookie", user.cookie);
+    const second = await request(app).post(`/holds/${holdId}/confirm`).set("Cookie", user.cookie);
     expect(second.status).toBe(200);
     expect(second.body.id).toBe(first.body.id);
   });
@@ -87,14 +87,14 @@ describe("confirm and release", () => {
 
     const before = await request(app)
       .get(`/me/hold?screeningId=${SEED_SCREENING_ID}`)
-      .auth(user.token, { type: "bearer" });
+      .set("Cookie", user.cookie);
     expect(before.body.id).toBe(held.body.id);
 
-    await request(app).post(`/holds/${held.body.id}/confirm`).auth(user.token, { type: "bearer" });
+    await request(app).post(`/holds/${held.body.id}/confirm`).set("Cookie", user.cookie);
 
     const after = await request(app)
       .get(`/me/hold?screeningId=${SEED_SCREENING_ID}`)
-      .auth(user.token, { type: "bearer" });
+      .set("Cookie", user.cookie);
     expect(after.body).toBeNull();
   });
 
@@ -103,12 +103,12 @@ describe("confirm and release", () => {
     const rowE = await seatIdsForRow("E");
     const held = await postHold(user, [rowE[0]!, rowE[1]!]);
 
-    const res = await request(app).delete(`/holds/${held.body.id}`).auth(user.token, { type: "bearer" });
+    const res = await request(app).delete(`/holds/${held.body.id}`).set("Cookie", user.cookie);
     expect(res.status).toBe(204);
 
     const hold = await request(app)
       .get(`/me/hold?screeningId=${SEED_SCREENING_ID}`)
-      .auth(user.token, { type: "bearer" });
+      .set("Cookie", user.cookie);
     expect(hold.body).toBeNull();
   });
 
@@ -122,14 +122,14 @@ describe("confirm and release", () => {
       data: { expiresAt: new Date(Date.now() - 60_000) },
     });
 
-    const res = await request(app).post(`/holds/${held.body.id}/confirm`).auth(user.token, { type: "bearer" });
+    const res = await request(app).post(`/holds/${held.body.id}/confirm`).set("Cookie", user.cookie);
     expect(res.status).toBe(410);
     expect(res.body.code).toBe("HOLD_EXPIRED");
   });
 
   it("404s releasing an unknown hold", async () => {
     const user = await register("release-404");
-    const res = await request(app).delete("/holds/nope").auth(user.token, { type: "bearer" });
+    const res = await request(app).delete("/holds/nope").set("Cookie", user.cookie);
     expect(res.status).toBe(404);
     expect(res.body.code).toBe("HOLD_NOT_FOUND");
   });
