@@ -49,7 +49,7 @@ afterAll(async () => {
 });
 
 describe("realtime", () => {
-  it("rejects a handshake without a token", async () => {
+  it("rejects a handshake without a cookie", async () => {
     const socket = ioClient(url, { transports: ["websocket"], reconnection: false });
     await expect(waitForConnect(socket)).rejects.toThrow();
     socket.close();
@@ -59,7 +59,7 @@ describe("realtime", () => {
     const socket = ioClient(url, {
       transports: ["websocket"],
       reconnection: false,
-      auth: { token: user.token },
+      extraHeaders: { Cookie: user.cookie },
     });
     await waitForConnect(socket);
     await new Promise<void>((resolve) =>
@@ -73,7 +73,7 @@ describe("realtime", () => {
 
     const res = await request(app)
       .post(`/screenings/${SEED_SCREENING_ID}/holds`)
-      .auth(user.token, { type: "bearer" })
+      .set("Cookie", user.cookie)
       .send({ seatIds: [seat] });
     expect(res.status).toBe(201);
 

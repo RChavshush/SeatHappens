@@ -32,7 +32,7 @@ describe("expiry sweep", () => {
 
     const held = await request(app)
       .post(`/screenings/${SEED_SCREENING_ID}/holds`)
-      .auth(user.token, { type: "bearer" })
+      .set("Cookie", user.cookie)
       .send({ seatIds: [seat] });
     expect(held.status).toBe(201);
 

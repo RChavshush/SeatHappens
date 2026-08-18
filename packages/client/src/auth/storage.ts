@@ -2,29 +2,23 @@ import { userSchema } from "@cinema/shared";
 import type { AuthResponse } from "@cinema/shared";
 import type { AuthState } from "./types";
 
-const TOKEN_KEY = "cinema.token";
 const USER_KEY = "cinema.user";
 
-export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
-
 export const loadAuth = (): AuthState => {
-  const token = getToken();
   const rawUser = localStorage.getItem(USER_KEY);
-  if (!token || !rawUser) return { user: null, token: null };
+  if (!rawUser) return { user: null };
 
   const parsed = userSchema.safeParse(safeJsonParse(rawUser));
-  if (!parsed.success) return { user: null, token: null };
+  if (!parsed.success) return { user: null };
 
-  return { user: parsed.data, token };
+  return { user: parsed.data };
 };
 
 export const saveAuth = (auth: AuthResponse): void => {
-  localStorage.setItem(TOKEN_KEY, auth.token);
   localStorage.setItem(USER_KEY, JSON.stringify(auth.user));
 };
 
 export const clearAuth = (): void => {
-  localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
 };
 

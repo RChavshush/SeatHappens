@@ -9,14 +9,14 @@ import { SOCKET_EVENTS } from "./events";
 
 export const useSeatUpdates = (
   screeningId: string | undefined,
-  token: string | null,
+  enabled: boolean,
 ): void => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!screeningId || !token) return;
+    if (!screeningId || !enabled) return;
 
-    const socket = createSocket(token);
+    const socket = createSocket();
 
     const onConnect = () => {
       socket.emit(SOCKET_EVENTS.subscribe, { screeningId });
@@ -41,5 +41,5 @@ export const useSeatUpdates = (
       socket.off(SOCKET_EVENTS.seatsUpdated, onSeatsUpdated);
       socket.disconnect();
     };
-  }, [screeningId, token, queryClient]);
+  }, [screeningId, enabled, queryClient]);
 };
