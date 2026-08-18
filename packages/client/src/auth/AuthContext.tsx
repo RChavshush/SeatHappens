@@ -1,6 +1,14 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import type { AuthResponse } from "@cinema/shared";
+import { setUnauthorizedHandler } from "../api/authEvents";
 import type { AuthContextValue, AuthState } from "./types";
 import { clearAuth, loadAuth, saveAuth } from "./storage";
 
@@ -18,6 +26,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearAuth();
     setState({ user: null, token: null });
   }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(signOut);
+    return () => setUnauthorizedHandler(null);
+  }, [signOut]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ ...state, signIn, signOut }),
