@@ -78,6 +78,15 @@ describe("evaluateSeat", () => {
     expect(result.disabled).toBe(false);
   });
 
+  it("still extends when a selected seat is transiently marked taken-by-others", () => {
+    const raced = buildRow("A", ["held", "held", "available"]);
+    raced.seats[0] = { ...raced.seats[0]!, heldByMe: false };
+    raced.seats[1] = { ...raced.seats[1]!, heldByMe: false };
+    const racedMap = buildMap([raced]);
+    const result = evaluateSeat(racedMap, raced.seats[2]!, new Set(["A1", "A2"]));
+    expect(result.disabled).toBe(false);
+  });
+
   it("disables a seat disconnected from the active selection", () => {
     // A1 selected; B3 in the next row touches nothing selected
     const other = buildRow("B", ["available", "available", "available"]);

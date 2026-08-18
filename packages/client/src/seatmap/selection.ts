@@ -14,8 +14,14 @@ export const seatVariant = (seat: SeatView): SeatVariant =>
         : SEAT_VARIANT.held
       : SEAT_VARIANT.available;
 
-const rowStates = (row: SeatMapRow): SeatState[] =>
-  row.seats.map((seat) => (seat.heldByMe ? SEAT_STATE.available : seat.status));
+// A selected seat is the user's own intent, so treat it as available even if a
+// realtime seatsUpdated broadcast racing ahead of the hold's HTTP reply has
+// transiently marked it taken-by-others; otherwise the next seat's validation
+// fails and its click is swallowed.
+const rowStates = (row: SeatMapRow, selected: ReadonlySet<string>): SeatState[] =>
+  row.seats.map((seat) =>
+    seat.heldByMe || selected.has(seat.id) ? SEAT_STATE.available : seat.status,
+  );
 
 const selectionIndexes = (row: SeatMapRow, selected: ReadonlySet<string>): number[] =>
   row.seats.flatMap((seat, index) => (selected.has(seat.id) ? [index] : []));
@@ -55,7 +61,7 @@ export const evaluateSeat = (
   if (!row) return { disabled: false };
   const seatIndex = row.seats.findIndex((s) => s.id === seat.id);
   const candidate = [...selectionIndexes(row, selected), seatIndex];
-  const result = validateSelection(rowStates(row), candidate);
+  const result = validateSelection(rowStates(row, selected), candidate);
   return result.ok ? { disabled: false } : { disabled: true, reason: result.message };
 };
 
