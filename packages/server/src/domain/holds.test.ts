@@ -163,3 +163,14 @@ describe("createHold — extending a hold (broadcast delta)", () => {
     await request(app).delete(`/holds/${moved.hold.id}`).auth(userB.token, { type: "bearer" });
   });
 });
+
+describe("createHold — width-aware main/balcony boundary", () => {
+  it("rejects a column-aligned balcony seat that isn't the wrap entry", async () => {
+    const j = await seatIdsForRow("J"); // 10-wide main row
+    const k = await seatIdsForRow("K"); // 5-wide balcony row
+    // J4,J5,J6 (cols 3-5) + K5 (col 4): aligned column but different width, no J10 -> rejected
+    const res = await postHold(userA, [j[3]!, j[4]!, j[5]!, k[4]!]);
+    expect(res.status).toBe(422);
+    expect(res.body.code).toBe("NOT_CONSECUTIVE");
+  });
+});

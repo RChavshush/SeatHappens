@@ -62,8 +62,9 @@ describe("evaluateSeat", () => {
     expect(result.reason).toMatch(/trap|isolate|single/i);
   });
 
-  it("allows a seat directly behind the active selection (connected)", () => {
-    const other = buildRow("B", ["available"]);
+  it("allows a seat directly behind the active selection (same-width rows)", () => {
+    // row is 5 wide; use a same-width row so the vertical link applies
+    const other = buildRow("B", ["available", "available", "available", "available", "available"]);
     const twoRowMap = buildMap([row, other]);
     const result = evaluateSeat(twoRowMap, other.seats[0]!, new Set(["A1"]));
     expect(result.disabled).toBe(false);

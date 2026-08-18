@@ -224,3 +224,38 @@ describe("validateRows — multi-row selection (connected group)", () => {
     ).toMatchObject({ ok: false, code: "EMPTY_SELECTION" });
   });
 });
+
+describe("validateRows — width-aware boundary (main↔balcony)", () => {
+  const empty10 = (): SeatState[] => Array(10).fill("available");
+  const empty5 = (): SeatState[] => Array(5).fill("available");
+
+  it("does not connect different-width rows by matching column", () => {
+    // J5 (10-wide, col 4) + K5 (5-wide, col 4): same index, different width -> not a group
+    expect(
+      validateRows([
+        { rowIndex: 9, row: empty10(), selection: [4] },
+        { rowIndex: 10, row: empty5(), selection: [4] },
+      ]),
+    ).toMatchObject({ ok: false, code: "NOT_CONSECUTIVE" });
+  });
+
+  it("connects different-width rows only at seat 1 via the wrap", () => {
+    // J10 (10-wide, last col 9) + K1 (5-wide, col 0): wrap into index 1 -> connected
+    expect(
+      validateRows([
+        { rowIndex: 9, row: empty10(), selection: [9] },
+        { rowIndex: 10, row: empty5(), selection: [0] },
+      ]),
+    ).toEqual({ ok: true });
+  });
+
+  it("rejects a column-aligned balcony seat when the main run does not reach its end", () => {
+    // E4-8..J5,J6 style: main cols 3-5, balcony col 4 (K5) aligned but no J10 -> disconnected
+    expect(
+      validateRows([
+        { rowIndex: 9, row: empty10(), selection: [3, 4, 5] },
+        { rowIndex: 10, row: empty5(), selection: [4] },
+      ]),
+    ).toMatchObject({ ok: false, code: "NOT_CONSECUTIVE" });
+  });
+});

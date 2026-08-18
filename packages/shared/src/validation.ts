@@ -90,12 +90,15 @@ const isConnected = (rows: RowSelection[]): boolean => {
   }
   const has = (r: number, c: number): boolean => nodes.has(`${r}:${c}`);
 
+  const sameWidth = (a: number, b: number): boolean =>
+    lastCol.get(a) !== undefined && lastCol.get(a) === lastCol.get(b);
+
   const neighbors = (r: number, c: number): string[] => {
     const out: string[] = [];
     if (has(r, c - 1)) out.push(`${r}:${c - 1}`);
     if (has(r, c + 1)) out.push(`${r}:${c + 1}`);
-    if (has(r - 1, c)) out.push(`${r - 1}:${c}`);
-    if (has(r + 1, c)) out.push(`${r + 1}:${c}`);
+    if (sameWidth(r, r - 1) && has(r - 1, c)) out.push(`${r - 1}:${c}`);
+    if (sameWidth(r, r + 1) && has(r + 1, c)) out.push(`${r + 1}:${c}`);
     const endOfThis = lastCol.get(r);
     if (endOfThis !== undefined && c === endOfThis && has(r + 1, 0)) {
       out.push(`${r + 1}:0`);
