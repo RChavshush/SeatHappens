@@ -28,6 +28,7 @@ export const SeatMap = ({ seatMap, selected, onSeatClick }: SeatMapProps) => {
         ))}
       </div>
       <span aria-hidden="true" className="w-5 shrink-0" />
+    </div>
   );
 
   return (
