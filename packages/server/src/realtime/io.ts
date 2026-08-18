@@ -1,16 +1,19 @@
 import type { Server as HttpServer } from "node:http";
 import { Server } from "socket.io";
 import type { SeatsUpdatedEvent } from "@cinema/shared";
+import { AUTH_COOKIE_NAME } from "../auth/cookie.js";
 import { verifyToken } from "../auth/jwt.js";
 import { env } from "../env.js";
 import type { SeatBroadcaster, SocketData } from "../types.js";
 
 const roomFor = (screeningId: string): string => `screening:${screeningId}`;
 
-const extractToken = (auth: unknown, header: string | undefined): string | null => {
-  const fromAuth = (auth as { token?: unknown } | undefined)?.token;
-  if (typeof fromAuth === "string") return fromAuth;
-  if (header?.startsWith("Bearer ")) return header.slice("Bearer ".length);
+const readCookie = (header: string | undefined, name: string): string | null => {
+  if (!header) return null;
+  for (const part of header.split(";")) {
+    const [key, ...rest] = part.trim().split("=");
+    if (key === name) return rest.join("=");
+  }
   return null;
 };
 
@@ -25,7 +28,7 @@ export const createRealtime = (
   >(server, { cors: { origin: env.CLIENT_ORIGIN } });
 
   io.use((socket, next) => {
-    const token = extractToken(socket.handshake.auth, socket.handshake.headers.authorization);
+    const token = readCookie(socket.handshake.headers.cookie, AUTH_COOKIE_NAME);
     if (!token) {
       next(new Error("unauthorized"));
       return;
