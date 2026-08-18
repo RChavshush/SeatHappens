@@ -19,11 +19,11 @@ let rowA: string[];
 const postHold = (user: TestUser, seatIds: string[]) =>
   request(app)
     .post(`/screenings/${SEED_SCREENING_ID}/holds`)
-    .auth(user.token, { type: "bearer" })
+    .set("Cookie", user.cookie)
     .send({ seatIds });
 
 const seatmap = (user: TestUser) =>
-  request(app).get(`/screenings/${SEED_SCREENING_ID}/seatmap`).auth(user.token, { type: "bearer" });
+  request(app).get(`/screenings/${SEED_SCREENING_ID}/seatmap`).set("Cookie", user.cookie);
 
 const seatById = async (user: TestUser, id: string) => {
   const res = await seatmap(user);
@@ -96,7 +96,7 @@ describe("createHold — multi-row selection", () => {
     const res = await postHold(userA, [rowB[0]!, rowB[1]!, rowC[0]!, rowC[1]!]);
     expect(res.status).toBe(201);
     expect(res.body.seatIds).toHaveLength(4);
-    await request(app).delete(`/holds/${res.body.id}`).auth(userA.token, { type: "bearer" });
+    await request(app).delete(`/holds/${res.body.id}`).set("Cookie", userA.cookie);
   });
 
   it("rejects when one row's run is not consecutive", async () => {
@@ -124,7 +124,7 @@ describe("createHold — connected group across rows", () => {
     // K2,K3,K4,K5 + L1 -> L1 connects to K5 via the wrap
     const res = await postHold(userA, [k[1]!, k[2]!, k[3]!, k[4]!, l[0]!]);
     expect(res.status).toBe(201);
-    await request(app).delete(`/holds/${res.body.id}`).auth(userA.token, { type: "bearer" });
+    await request(app).delete(`/holds/${res.body.id}`).set("Cookie", userA.cookie);
   });
 });
 
@@ -136,6 +136,6 @@ describe("createHold — no seat-count cap", () => {
     const res = await postHold(userA, [...g, h[0]!]);
     expect(res.status).toBe(201);
     expect(res.body.seatIds).toHaveLength(11);
-    await request(app).delete(`/holds/${res.body.id}`).auth(userA.token, { type: "bearer" });
+    await request(app).delete(`/holds/${res.body.id}`).set("Cookie", userA.cookie);
   });
 });
