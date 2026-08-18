@@ -1,6 +1,12 @@
 import { HOLD_STATUS } from "@cinema/shared";
-import type { Hold, Reservation } from "@cinema/shared";
+import type { Hold, Reservation, User } from "@cinema/shared";
 import { prisma } from "../db.js";
+
+export const getMe = async (userId: string): Promise<User> =>
+  prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: { id: true, email: true, displayName: true },
+  });
 
 export const getCurrentHold = async (
   userId: string,
