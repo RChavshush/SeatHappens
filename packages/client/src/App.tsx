@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { setUnauthorizedHandler } from "./api/authEvents";
 import { useAuth } from "./auth/useAuth";
 import { AuthScreen } from "./auth/AuthScreen";
+import { MyReservations } from "./screening/MyReservations";
 import { ScreeningView } from "./screening/ScreeningView";
 
 const LoadingScreen = () => (
@@ -44,7 +45,7 @@ export const App = () => {
           </div>
         </div>
         <div className="flex items-center gap-3 text-sm">
-          <span className="hidden text-neutral-400 sm:inline">Hey, {user.displayName}</span>
+          <MyReservations displayName={user.displayName} />
           <button
             type="button"
             onClick={signOut}

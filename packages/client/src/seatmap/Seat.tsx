@@ -4,8 +4,8 @@ import type { SeatProps } from "./types";
 import { SEAT_VARIANT } from "./variants";
 
 export const Seat = ({ seat, variant, selected, evaluation, onClick }: SeatProps) => {
-  const shown = selected ? SEAT_VARIANT.selected : variant;
-  const stateLabel = selected ? SEAT_VARIANT.selected : variantLabel[variant];
+  const shown = selected ? SEAT_VARIANT.mine : variant;
+  const stateLabel = selected ? variantLabel[SEAT_VARIANT.mine] : variantLabel[variant];
   const label = `Row ${seat.rowLabel} seat ${seat.seatNumber}, ${stateLabel}`;
 
   return (

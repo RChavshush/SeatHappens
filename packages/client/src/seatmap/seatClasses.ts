@@ -10,14 +10,14 @@ export const seatClasses: Record<SeatVariant, string> = {
   held: "bg-seat-held border-2 border-dashed border-seat-held-border text-neutral-200",
   mine: "bg-seat-mine border-2 border-double border-seat-mine-border text-yellow-100",
   booked: "bg-seat-booked border-2 border-dotted border-seat-booked-border text-red-100",
-  selected:
-    "bg-seat-selected border-2 border-solid border-seat-selected-border font-bold text-black ring-2 ring-seat-selected-border shadow-[0_0_16px_-2px] shadow-yellow-300/60",
+  mineBooked:
+    "bg-seat-mine-booked border-2 border-double border-seat-mine-booked-border text-yellow-100",
 };
 
 export const variantLabel: Record<SeatVariant, string> = {
   available: "available",
   held: "Reserved (another user)",
   mine: "Reserved (you)",
-  booked: "booked",
-  selected: "selected",
+  booked: "Booked (another user)",
+  mineBooked: "Booked (you)",
 };

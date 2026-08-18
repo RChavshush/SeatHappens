@@ -15,7 +15,10 @@ export const buildSeatMap = async (
 
   const [seats, reservationSeats, locks] = await Promise.all([
     prisma.seat.findMany({ orderBy: [{ rowIndex: "asc" }, { seatNumber: "asc" }] }),
-    prisma.reservationSeat.findMany({ where: { screeningId }, select: { seatId: true } }),
+    prisma.reservationSeat.findMany({
+      where: { screeningId },
+      select: { seatId: true, reservation: { select: { userId: true } } },
+    }),
     prisma.seatLock.findMany({
       where: { screeningId, expiresAt: { gt: new Date() } },
       select: { seatId: true, expiresAt: true, hold: { select: { userId: true } } },
@@ -23,6 +26,9 @@ export const buildSeatMap = async (
   ]);
 
   const bookedSeatIds = new Set(reservationSeats.map((r) => r.seatId));
+  const mineBookedSeatIds = new Set(
+    reservationSeats.filter((r) => r.reservation.userId === viewer.id).map((r) => r.seatId),
+  );
   const lockBySeatId = new Map(locks.map((lock) => [lock.seatId, lock]));
 
   const rowsByIndex = new Map<number, SeatMapRow>();
@@ -30,10 +36,12 @@ export const buildSeatMap = async (
     const label = rowLabel(seat.rowIndex);
     let status: SeatState = SEAT_STATE.available;
     let heldByMe = false;
+    let bookedByMe = false;
     let holdExpiresAt: string | null = null;
 
     if (bookedSeatIds.has(seat.id)) {
       status = SEAT_STATE.booked;
+      bookedByMe = mineBookedSeatIds.has(seat.id);
     } else {
       const lock = lockBySeatId.get(seat.id);
       if (lock) {
@@ -49,6 +57,7 @@ export const buildSeatMap = async (
       seatNumber: seat.seatNumber,
       status,
       heldByMe,
+      bookedByMe,
       holdExpiresAt,
     };
 
