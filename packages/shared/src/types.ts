@@ -14,6 +14,7 @@ import type {
   movieSchema,
   registerRequestSchema,
   reservationSchema,
+  reservationSummarySchema,
   screeningSchema,
   seatMapRowSchema,
   seatMapSchema,
@@ -43,6 +44,7 @@ export type SeatMap = z.infer<typeof seatMapSchema>;
 export type CreateHoldRequest = z.infer<typeof createHoldRequestSchema>;
 export type Hold = z.infer<typeof holdSchema>;
 export type Reservation = z.infer<typeof reservationSchema>;
+export type ReservationSummary = z.infer<typeof reservationSummarySchema>;
 
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;
 

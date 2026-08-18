@@ -2,12 +2,19 @@ import { describe, expect, it } from "vitest";
 import type { SeatMap, SeatMapRow, SeatState, SeatView } from "@cinema/shared";
 import { evaluateSeat, nextSelection, seatVariant } from "./selection";
 
-const seat = (rowLabel: string, seatNumber: number, status: SeatState, heldByMe = false): SeatView => ({
+const seat = (
+  rowLabel: string,
+  seatNumber: number,
+  status: SeatState,
+  heldByMe = false,
+  bookedByMe = false,
+): SeatView => ({
   id: `${rowLabel}${seatNumber}`,
   rowLabel,
   seatNumber,
   status,
   heldByMe,
+  bookedByMe,
   holdExpiresAt: null,
 });
 
@@ -24,6 +31,10 @@ describe("seatVariant", () => {
     expect(seatVariant(seat("A", 2, "held"))).toBe("held");
     expect(seatVariant(seat("A", 3, "booked"))).toBe("booked");
     expect(seatVariant(seat("A", 4, "available"))).toBe("available");
+  });
+
+  it("maps a seat booked by me to mineBooked", () => {
+    expect(seatVariant(seat("A", 5, "booked", false, true))).toBe("mineBooked");
   });
 });
 

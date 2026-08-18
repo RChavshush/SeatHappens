@@ -3,6 +3,7 @@ import { AdminScreen } from "./admin/AdminScreen";
 import { setUnauthorizedHandler } from "./api/authEvents";
 import { useAuth } from "./auth/useAuth";
 import { AuthScreen } from "./auth/AuthScreen";
+import { MyReservations } from "./screening/MyReservations";
 import { ScreeningView } from "./screening/ScreeningView";
 
 type View = "book" | "admin";
@@ -77,7 +78,7 @@ export const App = () => {
               Admin
             </NavButton>
           </nav>
-          <span className="hidden text-neutral-400 sm:inline">Hey, {user.displayName}</span>
+          <MyReservations displayName={user.displayName} />
           <button
             type="button"
             onClick={signOut}

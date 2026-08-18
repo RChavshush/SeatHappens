@@ -5,7 +5,9 @@ import { SEAT_VARIANT } from "./variants";
 
 export const seatVariant = (seat: SeatView): SeatVariant =>
   seat.status === SEAT_STATE.booked
-    ? SEAT_VARIANT.booked
+    ? seat.bookedByMe
+      ? SEAT_VARIANT.mineBooked
+      : SEAT_VARIANT.booked
     : seat.status === SEAT_STATE.held
       ? seat.heldByMe
         ? SEAT_VARIANT.mine

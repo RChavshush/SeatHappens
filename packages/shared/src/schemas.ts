@@ -62,6 +62,7 @@ export const seatViewSchema = z.object({
   seatNumber: z.number().int().positive(),
   status: seatStateSchema,
   heldByMe: z.boolean(),
+  bookedByMe: z.boolean(),
   holdExpiresAt: z.string().datetime().nullable(),
 });
 
@@ -92,6 +93,16 @@ export const reservationSchema = z.object({
   screeningId: z.string(),
   referenceCode: z.string(),
   seatIds: z.array(z.string()),
+  confirmedAt: z.string().datetime(),
+});
+
+export const reservationSummarySchema = z.object({
+  id: z.string(),
+  screeningId: z.string(),
+  movieTitle: z.string(),
+  startsAt: z.string().datetime(),
+  referenceCode: z.string(),
+  seatLabels: z.array(z.string()),
   confirmedAt: z.string().datetime(),
 });
 

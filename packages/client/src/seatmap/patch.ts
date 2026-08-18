@@ -21,6 +21,7 @@ export const applySeatsUpdate = (
           status: update.status,
           holdExpiresAt: update.holdExpiresAt,
           heldByMe: update.status === SEAT_STATE.held && mine.has(seat.id),
+          bookedByMe: update.status === SEAT_STATE.booked && mine.has(seat.id),
         };
       }),
     })),

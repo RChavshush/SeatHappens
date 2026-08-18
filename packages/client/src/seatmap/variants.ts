@@ -3,5 +3,5 @@ export const SEAT_VARIANT = {
   held: "held",
   mine: "mine",
   booked: "booked",
-  selected: "selected",
+  mineBooked: "mineBooked",
 } as const;

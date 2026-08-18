@@ -8,8 +8,8 @@ const baseMap: SeatMap = {
     {
       rowLabel: "A",
       seats: [
-        { id: "A1", rowLabel: "A", seatNumber: 1, status: "available", heldByMe: false, holdExpiresAt: null },
-        { id: "A2", rowLabel: "A", seatNumber: 2, status: "available", heldByMe: false, holdExpiresAt: null },
+        { id: "A1", rowLabel: "A", seatNumber: 1, status: "available", heldByMe: false, bookedByMe: false, holdExpiresAt: null },
+        { id: "A2", rowLabel: "A", seatNumber: 2, status: "available", heldByMe: false, bookedByMe: false, holdExpiresAt: null },
       ],
     },
   ],
@@ -34,5 +34,36 @@ describe("applySeatsUpdate", () => {
     };
     expect(applySeatsUpdate(baseMap, event, ["A1"]).rows[0]!.seats[0]!.heldByMe).toBe(true);
     expect(applySeatsUpdate(baseMap, event, []).rows[0]!.seats[0]!.heldByMe).toBe(false);
+  });
+
+  it("marks a booked seat as bookedByMe when it was in my hold", () => {
+    const event: SeatsUpdatedEvent = {
+      screeningId: "s1",
+      seats: [{ id: "A1", status: "booked", holdExpiresAt: null }],
+    };
+    expect(applySeatsUpdate(baseMap, event, ["A1"]).rows[0]!.seats[0]!.bookedByMe).toBe(true);
+    expect(applySeatsUpdate(baseMap, event, []).rows[0]!.seats[0]!.bookedByMe).toBe(false);
+  });
+
+  it("clears bookedByMe on patched seats (deltas carry no owner)", () => {
+    const mineBookedMap: SeatMap = {
+      ...baseMap,
+      rows: [
+        {
+          rowLabel: "A",
+          seats: [
+            { ...baseMap.rows[0]!.seats[0]!, status: "booked", bookedByMe: true },
+            baseMap.rows[0]!.seats[1]!,
+          ],
+        },
+      ],
+    };
+    const event: SeatsUpdatedEvent = {
+      screeningId: "s1",
+      seats: [{ id: "A1", status: "available", holdExpiresAt: null }],
+    };
+    const patched = applySeatsUpdate(mineBookedMap, event, []).rows[0]!.seats[0]!;
+    expect(patched.status).toBe("available");
+    expect(patched.bookedByMe).toBe(false);
   });
 });

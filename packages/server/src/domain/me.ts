@@ -1,5 +1,5 @@
-import { HOLD_STATUS } from "@cinema/shared";
-import type { Hold, Reservation, User } from "@cinema/shared";
+import { HOLD_STATUS, rowLabel } from "@cinema/shared";
+import type { Hold, ReservationSummary, User } from "@cinema/shared";
 import { prisma } from "../db.js";
 
 export const getMe = async (userId: string): Promise<User> =>
@@ -26,17 +26,29 @@ export const getCurrentHold = async (
   };
 };
 
-export const listReservations = async (userId: string): Promise<Reservation[]> => {
+export const listReservations = async (userId: string): Promise<ReservationSummary[]> => {
   const rows = await prisma.reservation.findMany({
     where: { userId },
     orderBy: { confirmedAt: "desc" },
-    include: { seats: { select: { seatId: true } } },
+    include: {
+      screening: { include: { movie: { select: { title: true } } } },
+      seats: { select: { seat: { select: { rowIndex: true, seatNumber: true } } } },
+    },
   });
   return rows.map((r) => ({
     id: r.id,
     screeningId: r.screeningId,
+    movieTitle: r.screening.movie.title,
+    startsAt: r.screening.startsAt.toISOString(),
     referenceCode: r.referenceCode,
-    seatIds: r.seats.map((s) => s.seatId),
+    seatLabels: r.seats
+      .map((s) => ({
+        rowIndex: s.seat.rowIndex,
+        label: `${rowLabel(s.seat.rowIndex)}${s.seat.seatNumber}`,
+        seatNumber: s.seat.seatNumber,
+      }))
+      .sort((a, b) => a.rowIndex - b.rowIndex || a.seatNumber - b.seatNumber)
+      .map((s) => s.label),
     confirmedAt: r.confirmedAt.toISOString(),
   }));
 };
