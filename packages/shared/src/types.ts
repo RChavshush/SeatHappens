@@ -60,12 +60,6 @@ export interface SeatBlueprint {
   seatNumber: number;
 }
 
-export interface RowSelection {
-  rowIndex: number;
-  row: SeatState[];
-  selection: number[];
-}
-
 export type RuleErrorCode = (typeof RULE_ERROR_CODE)[keyof typeof RULE_ERROR_CODE];
 
 export type ValidationResult =

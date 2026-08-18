@@ -6,14 +6,9 @@ import {
   HOLD_STATUS,
   RULE_ERROR_CODE,
   SEAT_STATE,
-  validateRows,
+  validateSelection,
 } from "@cinema/shared";
-import type {
-  Reservation,
-  RowSelection,
-  RuleErrorCode,
-  SeatState,
-} from "@cinema/shared";
+import type { Reservation, RuleErrorCode, SeatState } from "@cinema/shared";
 import { prisma } from "../db.js";
 import { runSerializable, isUniqueViolation } from "../db-tx.js";
 import { env } from "../env.js";
@@ -81,49 +76,45 @@ export const createHold = async (
     }
 
     const rowIndexes = [...new Set(selected.map((s) => s.rowIndex))];
-    const selectedIdsByRow = new Map<number, Set<string>>();
-    for (const seat of selected) {
-      const set = selectedIdsByRow.get(seat.rowIndex) ?? new Set<string>();
-      set.add(seat.id);
-      selectedIdsByRow.set(seat.rowIndex, set);
+    if (rowIndexes.length > 1) {
+      throw createError(422, "Selected seats must be in the same row", {
+        code: RULE_ERROR_CODE.NOT_CONSECUTIVE,
+      });
     }
+    const rowIndex = rowIndexes[0]!;
+    const selectedInRow = new Set(seatIds);
 
     const rowSeats = await tx.seat.findMany({
-      where: { rowIndex: { in: rowIndexes } },
-      orderBy: [{ rowIndex: "asc" }, { seatNumber: "asc" }],
-      select: { id: true, rowIndex: true },
+      where: { rowIndex },
+      orderBy: { seatNumber: "asc" },
+      select: { id: true },
     });
-    const allRowSeatIds = rowSeats.map((s) => s.id);
+    const rowSeatIds = rowSeats.map((s) => s.id);
     const [booked, locked] = await Promise.all([
       tx.reservationSeat.findMany({
-        where: { screeningId, seatId: { in: allRowSeatIds } },
+        where: { screeningId, seatId: { in: rowSeatIds } },
         select: { seatId: true },
       }),
       tx.seatLock.findMany({
-        where: { screeningId, seatId: { in: allRowSeatIds }, expiresAt: { gt: dbNow } },
+        where: { screeningId, seatId: { in: rowSeatIds }, expiresAt: { gt: dbNow } },
         select: { seatId: true },
       }),
     ]);
     const bookedSet = new Set(booked.map((b) => b.seatId));
     const lockedSet = new Set(locked.map((l) => l.seatId));
 
-    const rowSelections: RowSelection[] = rowIndexes.map((index) => {
-      const seatsInRow = rowSeats.filter((s) => s.rowIndex === index);
-      const selectedInRow = selectedIdsByRow.get(index)!;
-      const row: SeatState[] = seatsInRow.map((s) =>
-        bookedSet.has(s.id)
-          ? SEAT_STATE.booked
-          : lockedSet.has(s.id)
-            ? SEAT_STATE.held
-            : SEAT_STATE.available,
-      );
-      const selection = seatsInRow
-        .map((s, i) => (selectedInRow.has(s.id) ? i : -1))
-        .filter((i) => i >= 0);
-      return { rowIndex: seatsInRow[0]!.rowIndex, row, selection };
-    });
+    const rowStates: SeatState[] = rowSeats.map((s) =>
+      bookedSet.has(s.id)
+        ? SEAT_STATE.booked
+        : lockedSet.has(s.id)
+          ? SEAT_STATE.held
+          : SEAT_STATE.available,
+    );
+    const selection = rowSeats
+      .map((s, i) => (selectedInRow.has(s.id) ? i : -1))
+      .filter((i) => i >= 0);
 
-    const result = validateRows(rowSelections);
+    const result = validateSelection(rowStates, selection);
     if (!result.ok) throw mapRuleError(result.code, result.message);
 
     try {

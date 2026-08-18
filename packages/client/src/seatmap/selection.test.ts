@@ -51,7 +51,7 @@ describe("evaluateSeat", () => {
   it("disables a non-consecutive addition", () => {
     const result = evaluateSeat(map, row.seats[2]!, new Set(["A1"]));
     expect(result.disabled).toBe(true);
-    expect(result.reason).toMatch(/next to each other|consecutive/i);
+    expect(result.reason).toMatch(/consecutive/i);
   });
 
   it("disables a selection that would isolate a seat", () => {
@@ -62,12 +62,12 @@ describe("evaluateSeat", () => {
     expect(result.reason).toMatch(/trap|isolate|single/i);
   });
 
-  it("allows a seat directly behind the active selection (same-width rows)", () => {
-    // row is 5 wide; use a same-width row so the vertical link applies
+  it("disables a seat in a different row than the active selection", () => {
     const other = buildRow("B", ["available", "available", "available", "available", "available"]);
     const twoRowMap = buildMap([row, other]);
     const result = evaluateSeat(twoRowMap, other.seats[0]!, new Set(["A1"]));
-    expect(result.disabled).toBe(false);
+    expect(result.disabled).toBe(true);
+    expect(result.reason).toMatch(/same row/i);
   });
 
   it("allows extending your own already-held seats", () => {
@@ -95,10 +95,6 @@ describe("nextSelection", () => {
     expect(result.has("A1")).toBe(false);
   });
 
-  it("accumulates a seat in another row (multi-row)", () => {
-    const result = nextSelection(new Set(["A1"]), map.rows[1]!.seats[0]!);
-    expect([...result].sort()).toEqual(["A1", "B1"]);
-  });
 
   it("extends the selection within the same row", () => {
     const result = nextSelection(new Set(["A1"]), map.rows[0]!.seats[1]!);

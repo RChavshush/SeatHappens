@@ -1,5 +1,5 @@
-import { SEAT_STATE, isOccupied, validateRows } from "@cinema/shared";
-import type { RowSelection, SeatMap, SeatView } from "@cinema/shared";
+import { SEAT_STATE, isOccupied, validateSelection } from "@cinema/shared";
+import type { SeatMap, SeatMapRow, SeatState, SeatView } from "@cinema/shared";
 import type { SeatEvaluation, SeatVariant } from "./types";
 import { SEAT_VARIANT } from "./variants";
 
@@ -14,17 +14,23 @@ export const seatVariant = (seat: SeatView): SeatVariant =>
         : SEAT_VARIANT.held
       : SEAT_VARIANT.available;
 
-const buildRowSelections = (
+const rowStates = (row: SeatMapRow): SeatState[] =>
+  row.seats.map((seat) => (seat.heldByMe ? SEAT_STATE.available : seat.status));
+
+const selectionIndexes = (row: SeatMapRow, selected: ReadonlySet<string>): number[] =>
+  row.seats.flatMap((seat, index) => (selected.has(seat.id) ? [index] : []));
+
+const activeRowLabel = (
   seatMap: SeatMap,
-  selectedIds: ReadonlySet<string>,
-): RowSelection[] =>
-  seatMap.rows.map((row, rowIndex) => ({
-    rowIndex,
-    row: row.seats.map((seat) => (seat.heldByMe ? SEAT_STATE.available : seat.status)),
-    selection: row.seats.flatMap((seat, index) =>
-      selectedIds.has(seat.id) ? [index] : [],
-    ),
-  }));
+  selected: ReadonlySet<string>,
+): string | null => {
+  for (const row of seatMap.rows) {
+    for (const seat of row.seats) {
+      if (selected.has(seat.id)) return row.rowLabel;
+    }
+  }
+  return null;
+};
 
 export const evaluateSeat = (
   seatMap: SeatMap,
@@ -40,9 +46,16 @@ export const evaluateSeat = (
     };
   }
 
-  const candidate = new Set(selected);
-  candidate.add(seat.id);
-  const result = validateRows(buildRowSelections(seatMap, candidate));
+  const active = activeRowLabel(seatMap, selected);
+  if (active !== null && active !== seat.rowLabel) {
+    return { disabled: true, reason: "Selected seats must be in the same row." };
+  }
+
+  const row = seatMap.rows.find((r) => r.rowLabel === seat.rowLabel);
+  if (!row) return { disabled: false };
+  const seatIndex = row.seats.findIndex((s) => s.id === seat.id);
+  const candidate = [...selectionIndexes(row, selected), seatIndex];
+  const result = validateSelection(rowStates(row), candidate);
   return result.ok ? { disabled: false } : { disabled: true, reason: result.message };
 };
 

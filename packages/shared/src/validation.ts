@@ -1,11 +1,6 @@
 import { RULE_ERROR_CODE } from "./ruleErrorCodes.js";
 import { SEAT_STATE, isOccupied } from "./seats.js";
-import type {
-  RowSelection,
-  RuleErrorCode,
-  SeatState,
-  ValidationResult,
-} from "./types.js";
+import type { RuleErrorCode, SeatState, ValidationResult } from "./types.js";
 
 const ok: ValidationResult = { ok: true };
 
@@ -61,70 +56,6 @@ export const validateSelection = (
   }
 
   return ok;
-};
-
-export const validateRows = (rows: RowSelection[]): ValidationResult => {
-  const active = rows.filter((r) => r.selection.length > 0);
-  if (active.length === 0) {
-    return fail(RULE_ERROR_CODE.EMPTY_SELECTION, "Select at least one seat.");
-  }
-  for (const { row, selection } of active) {
-    const result = validateSelection(row, selection);
-    if (!result.ok) return result;
-  }
-  if (!isConnected(active)) {
-    return fail(
-      RULE_ERROR_CODE.NOT_CONSECUTIVE,
-      "All selected seats must be next to each other in one group.",
-    );
-  }
-  return ok;
-};
-
-const isConnected = (rows: RowSelection[]): boolean => {
-  const nodes = new Set<string>();
-  const lastCol = new Map<number, number>();
-  for (const { rowIndex, row, selection } of rows) {
-    lastCol.set(rowIndex, row.length - 1);
-    for (const col of selection) nodes.add(`${rowIndex}:${col}`);
-  }
-  const has = (r: number, c: number): boolean => nodes.has(`${r}:${c}`);
-
-  const sameWidth = (a: number, b: number): boolean =>
-    lastCol.get(a) !== undefined && lastCol.get(a) === lastCol.get(b);
-
-  const neighbors = (r: number, c: number): string[] => {
-    const out: string[] = [];
-    if (has(r, c - 1)) out.push(`${r}:${c - 1}`);
-    if (has(r, c + 1)) out.push(`${r}:${c + 1}`);
-    if (sameWidth(r, r - 1) && has(r - 1, c)) out.push(`${r - 1}:${c}`);
-    if (sameWidth(r, r + 1) && has(r + 1, c)) out.push(`${r + 1}:${c}`);
-    const endOfThis = lastCol.get(r);
-    if (endOfThis !== undefined && c === endOfThis && has(r + 1, 0)) {
-      out.push(`${r + 1}:0`);
-    }
-    const endOfPrev = lastCol.get(r - 1);
-    if (c === 0 && endOfPrev !== undefined && has(r - 1, endOfPrev)) {
-      out.push(`${r - 1}:${endOfPrev}`);
-    }
-    return out;
-  };
-
-  const start = nodes.values().next().value;
-  if (start === undefined) return true;
-  const seen = new Set<string>([start]);
-  const queue = [start];
-  while (queue.length > 0) {
-    const current = queue.pop()!;
-    const [r, c] = current.split(":").map(Number) as [number, number];
-    for (const next of neighbors(r, c)) {
-      if (!seen.has(next)) {
-        seen.add(next);
-        queue.push(next);
-      }
-    }
-  }
-  return seen.size === nodes.size;
 };
 
 const applySelection = (

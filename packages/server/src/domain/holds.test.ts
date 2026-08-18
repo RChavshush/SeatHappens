@@ -90,57 +90,6 @@ describe("create hold", () => {
   });
 });
 
-describe("createHold — multi-row selection", () => {
-  it("holds consecutive seats spanning two rows in one request", async () => {
-    const rowB = await seatIdsForRow("B");
-    const rowC = await seatIdsForRow("C");
-    const res = await postHold(userA, [rowB[0]!, rowB[1]!, rowC[0]!, rowC[1]!]);
-    expect(res.status).toBe(201);
-    expect(res.body.seatIds).toHaveLength(4);
-    await request(app).delete(`/holds/${res.body.id}`).set("Cookie", userA.cookie);
-  });
-
-  it("rejects when one row's run is not consecutive", async () => {
-    const rowD = await seatIdsForRow("D");
-    const rowE = await seatIdsForRow("E");
-    const res = await postHold(userA, [rowD[0]!, rowD[1]!, rowE[0]!, rowE[2]!]);
-    expect(res.status).toBe(422);
-    expect(res.body.code).toBe("NOT_CONSECUTIVE");
-  });
-});
-
-describe("createHold — connected group across rows", () => {
-  it("rejects a seat left disconnected in the next row (image 1)", async () => {
-    const k = await seatIdsForRow("K"); // 5 seats
-    const l = await seatIdsForRow("L");
-    // K2,K3,K4 + L1 -> L1 touches nothing selected
-    const res = await postHold(userA, [k[1]!, k[2]!, k[3]!, l[0]!]);
-    expect(res.status).toBe(422);
-    expect(res.body.code).toBe("NOT_CONSECUTIVE");
-  });
-
-  it("accepts a run that wraps from row end into the next row (image 2)", async () => {
-    const k = await seatIdsForRow("K");
-    const l = await seatIdsForRow("L");
-    // K2,K3,K4,K5 + L1 -> L1 connects to K5 via the wrap
-    const res = await postHold(userA, [k[1]!, k[2]!, k[3]!, k[4]!, l[0]!]);
-    expect(res.status).toBe(201);
-    await request(app).delete(`/holds/${res.body.id}`).set("Cookie", userA.cookie);
-  });
-});
-
-describe("createHold — no seat-count cap", () => {
-  it("accepts a connected group of more than 10 seats", async () => {
-    const g = await seatIdsForRow("G"); // full 10-seat row
-    const h = await seatIdsForRow("H");
-    // G1..G10 + H1 (H1 connects to G10 via the wrap) = 11 seats
-    const res = await postHold(userA, [...g, h[0]!]);
-    expect(res.status).toBe(201);
-    expect(res.body.seatIds).toHaveLength(11);
-    await request(app).delete(`/holds/${res.body.id}`).set("Cookie", userA.cookie);
-  });
-});
-
 describe("createHold — extending a hold (broadcast delta)", () => {
   it("does not report re-held seats as released", async () => {
     const row = await seatIdsForRow("I"); // a row no other test uses
@@ -161,16 +110,5 @@ describe("createHold — extending a hold (broadcast delta)", () => {
 
     expect(moved.releasedSeatIds.sort()).toEqual([row[2], row[3]].sort());
     await request(app).delete(`/holds/${moved.hold.id}`).auth(userB.token, { type: "bearer" });
-  });
-});
-
-describe("createHold — width-aware main/balcony boundary", () => {
-  it("rejects a column-aligned balcony seat that isn't the wrap entry", async () => {
-    const j = await seatIdsForRow("J"); // 10-wide main row
-    const k = await seatIdsForRow("K"); // 5-wide balcony row
-    // J4,J5,J6 (cols 3-5) + K5 (col 4): aligned column but different width, no J10 -> rejected
-    const res = await postHold(userA, [j[3]!, j[4]!, j[5]!, k[4]!]);
-    expect(res.status).toBe(422);
-    expect(res.body.code).toBe("NOT_CONSECUTIVE");
   });
 });
