@@ -1,15 +1,19 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SeatView } from "@cinema/shared";
 import { confirmHold, createHold, getMyHold, releaseHold } from "../api/holds";
 import { getSeatMap, listScreenings } from "../api/screenings";
 import { useAuth } from "../auth/AuthContext";
 import { HoldPanel } from "../hold/HoldPanel";
+import { reconcileHold } from "../hold/reconcile";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { queryKeys } from "../query/keys";
 import { SeatMap } from "../seatmap/SeatMap";
 import { labelForSeats, nextSelection, selectedSeatIds } from "../seatmap/selection";
 import { useSeatUpdates } from "../socket/useSeatUpdates";
 import { useErrorToast, useToasts } from "../toast/ToastContext";
+
+const HOLD_DEBOUNCE_MS = 400;
 
 export const ScreeningView = () => {
   const { token } = useAuth();
@@ -43,7 +47,7 @@ export const ScreeningView = () => {
 
   const onSeatClick = useCallback(
     (seat: SeatView) => setSelected((prev) => nextSelection(prev, seat)),
-    [seatMap],
+    [],
   );
 
   const invalidateSeatMap = useCallback(() => {
@@ -56,18 +60,22 @@ export const ScreeningView = () => {
     mutationFn: (seatIds: string[]) => createHold(screeningId!, seatIds),
     onSuccess: (created) => {
       queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), created);
-      setSelected(new Set());
+      setSelected(new Set(created.seatIds));
       invalidateSeatMap();
     },
-    onError: showError,
+    onError: (error) => {
+      showError(error);
+      setSelected(new Set(hold?.seatIds ?? []));
+    },
   });
 
   const confirmMutation = useMutation({
     mutationFn: (holdId: string) => confirmHold(holdId),
     onSuccess: (reservation) => {
       queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), null);
+      setSelected(new Set());
       invalidateSeatMap();
-      push("success", `Booked! Reference ${reservation.referenceCode}.`);
+      push("success", `You're in! Seats locked, reference ${reservation.referenceCode}. 🍿`);
     },
     onError: (error) => {
       showError(error);
@@ -80,6 +88,7 @@ export const ScreeningView = () => {
     mutationFn: (holdId: string) => releaseHold(holdId),
     onSuccess: () => {
       queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), null);
+      setSelected(new Set());
       invalidateSeatMap();
     },
     onError: showError,
@@ -87,12 +96,36 @@ export const ScreeningView = () => {
 
   const onExpire = useCallback(() => {
     queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), null);
+    setSelected(new Set());
     invalidateSeatMap();
-    push("info", "Your hold expired and the seats were released.");
+    push("info", "Hold expired — the seats slipped back into the wild. 🦌");
   }, [queryClient, invalidateSeatMap, push]);
 
+  const seededRef = useRef(false);
+  useEffect(() => {
+    if (seededRef.current || !holdQuery.isSuccess) return;
+    seededRef.current = true;
+    if (hold) setSelected(new Set(hold.seatIds));
+  }, [holdQuery.isSuccess, hold]);
+
+  const debouncedSelected = useDebouncedValue(selected, HOLD_DEBOUNCE_MS);
+  const mutating =
+    createMutation.isPending || releaseMutation.isPending || confirmMutation.isPending;
+
+  useEffect(() => {
+    if (!seededRef.current || !seatMap || mutating) return;
+    const target = selectedSeatIds(seatMap, debouncedSelected);
+    const current = selectedSeatIds(seatMap, selected);
+    const settled =
+      target.length === current.length && target.every((id, i) => id === current[i]);
+    if (!settled) return;
+    const action = reconcileHold(target, hold);
+    if (action.kind === "create") createMutation.mutate(action.seatIds);
+    else if (action.kind === "release") releaseMutation.mutate(action.holdId);
+  }, [debouncedSelected, selected, hold, seatMap, mutating, createMutation, releaseMutation]);
+
   if (screeningsQuery.isPending || seatMapQuery.isPending) {
-    return <p className="text-slate-400">Loading seat map…</p>;
+    return <p className="text-slate-400">Rolling the seat map…</p>;
   }
   if (screeningsQuery.isError || !screeningId) {
     return <p className="text-red-400">Could not load screenings.</p>;
@@ -104,7 +137,7 @@ export const ScreeningView = () => {
   const selectedIds = selectedSeatIds(seatMap, selected);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <SeatMap seatMap={seatMap} selected={selected} onSeatClick={onSeatClick} />
 
       <div>
@@ -119,23 +152,38 @@ export const ScreeningView = () => {
             onExpire={onExpire}
           />
         ) : (
-          <aside className="space-y-4 rounded-xl border border-slate-700 bg-slate-900 p-4">
-            <h2 className="text-lg font-semibold text-slate-100">Select seats</h2>
-            <p className="text-sm text-slate-300">
-              {selectedIds.length === 0
-                ? "Choose adjacent seats. You can pick a block in each row to sit together across rows."
-                : labelForSeats(seatMap, selectedIds).join(", ")}
+          <aside className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-900/70 p-5 shadow-lg shadow-black/20 backdrop-blur">
+            <h2 className="text-lg font-semibold text-slate-100">Pick your spot</h2>
+            <p className="text-sm leading-relaxed text-slate-300">
+              {selectedIds.length === 0 ? (
+                "Tap a seat — or a whole row of them. We don't judge. Sit with your people; blocks can span rows as long as they stay connected."
+              ) : (
+                <>
+                  <span className="text-slate-400">Reserving: </span>
+                  <span className="font-medium text-slate-100">
+                    {labelForSeats(seatMap, selectedIds).join(", ")}
+                  </span>
+                </>
+              )}
             </p>
-            <button
-              type="button"
-              onClick={() => createMutation.mutate(selectedIds)}
-              disabled={selectedIds.length === 0 || createMutation.isPending}
-              className="w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-60"
+            <p
+              aria-live="polite"
+              className="flex items-center gap-2 text-sm font-medium text-amber-300"
             >
-              {createMutation.isPending
-                ? "Holding…"
-                : `Hold ${selectedIds.length || ""} seat${selectedIds.length === 1 ? "" : "s"}`.trim()}
-            </button>
+              {selectedIds.length === 0 ? (
+                <span className="text-slate-500">Your hold starts the moment you tap. ✨</span>
+              ) : createMutation.isPending ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                  Grabbing those seats…
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-amber-400 motion-safe:animate-ping" />
+                  Holding automatically…
+                </span>
+              )}
+            </p>
           </aside>
         )}
       </div>
