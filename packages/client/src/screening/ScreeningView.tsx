@@ -180,7 +180,11 @@ export const ScreeningView = () => {
     mutationFn: (seatIds: string[]) => createHold(screeningId!, seatIds),
     onSuccess: (created) => {
       queryClient.setQueryData(queryKeys.myHold(screeningId ?? "none"), created);
-      setSelected(new Set(created.seatIds));
+      setSelected((prev) => {
+        const held = new Set(created.seatIds);
+        const unchanged = prev.size === held.size && [...prev].every((id) => held.has(id));
+        return unchanged ? held : prev;
+      });
       invalidateSeatMap();
     },
     onError: (error) => {
