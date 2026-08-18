@@ -50,14 +50,27 @@ export const AuthScreen = () => {
 
   return (
     <main className="flex min-h-full items-center justify-center p-4">
-      <form
-        onSubmit={onSubmit}
-        noValidate
-        className="w-full max-w-sm space-y-4 rounded-xl bg-slate-900 p-6 shadow-lg"
-      >
-        <h1 className="text-xl font-semibold text-slate-100">
-          {mode === "login" ? "Sign in" : "Create account"}
-        </h1>
+      <div className="w-full max-w-sm space-y-5">
+        <div className="text-center">
+          <div aria-hidden="true" className="text-4xl">
+            🎬🍿
+          </div>
+          <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white">
+            The Corner Cinema
+          </h1>
+          <p className="mt-1 text-sm text-marquee">
+            Grab your seat before someone else grabs the popcorn.
+          </p>
+        </div>
+
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className="space-y-4 rounded-2xl border border-neutral-800 bg-neutral-950/80 p-6 shadow-xl shadow-black/40 backdrop-blur"
+        >
+          <h2 className="text-lg font-bold text-white">
+            {mode === "login" ? "Welcome back" : "Join the club"}
+          </h2>
 
         <Field
           label="Email"
@@ -92,28 +105,29 @@ export const AuthScreen = () => {
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-500 disabled:opacity-60"
-        >
-          {mutation.isPending
-            ? "Please wait…"
-            : mode === "login"
-              ? "Sign in"
-              : "Create account"}
-        </button>
+          <button
+            type="submit"
+            disabled={mutation.isPending}
+            className="w-full rounded-xl bg-marquee px-4 py-2.5 font-bold uppercase tracking-wide text-black transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-marquee focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
+          >
+            {mutation.isPending
+              ? "Rolling the reel…"
+              : mode === "login"
+                ? "Take my seat"
+                : "Sign me up"}
+          </button>
 
-        <button
-          type="button"
-          onClick={() => switchMode(mode === "login" ? "register" : "login")}
-          className="w-full text-sm text-slate-400 hover:text-slate-200"
-        >
-          {mode === "login"
-            ? "Need an account? Register"
-            : "Already have an account? Sign in"}
-        </button>
-      </form>
+          <button
+            type="button"
+            onClick={() => switchMode(mode === "login" ? "register" : "login")}
+            className="w-full text-sm text-neutral-400 transition hover:text-marquee"
+          >
+            {mode === "login"
+              ? "New here? Create an account"
+              : "Already have an account? Sign in"}
+          </button>
+        </form>
+      </div>
     </main>
   );
 };
@@ -129,14 +143,14 @@ interface FieldProps {
 
 const Field = ({ label, type, value, error, autoComplete, onChange }: FieldProps) => (
   <label className="block space-y-1">
-    <span className="text-sm text-slate-300">{label}</span>
+    <span className="text-sm text-neutral-300">{label}</span>
     <input
       type={type}
       value={value}
       autoComplete={autoComplete}
       onChange={(event) => onChange(event.target.value)}
       aria-invalid={error ? true : undefined}
-      className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none"
+      className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-marquee focus:outline-none focus:ring-1 focus:ring-marquee/60"
     />
     {error && <span className="text-xs text-red-400">{error}</span>}
   </label>

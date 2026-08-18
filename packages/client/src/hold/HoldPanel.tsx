@@ -30,43 +30,53 @@ export const HoldPanel = ({
     if (expired) onExpire();
   }, [expired, onExpire]);
 
-  return (
-    <aside className="space-y-4 rounded-xl border border-slate-700 bg-slate-900 p-4">
-      <h2 className="text-lg font-semibold text-slate-100">Your hold</h2>
+  const urgent = remaining <= 60_000;
 
-      <div className="text-sm text-slate-300">
-        <span className="text-slate-500">Seats: </span>
-        {seatLabels.join(", ")}
+  return (
+    <aside className="space-y-4 rounded-2xl border border-marquee/40 bg-neutral-950/80 p-5 shadow-lg shadow-black/40 backdrop-blur">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-black uppercase tracking-tight text-white">Seats on hold</h2>
+        <span aria-hidden="true" className="text-xl">
+          🍿
+        </span>
       </div>
 
-      <p aria-live="polite" className="text-sm text-slate-300">
-        Expires in{" "}
-        <span
-          className={cx(
-            "font-mono text-base font-semibold tabular-nums",
-            remaining <= 60_000 ? "text-amber-400" : "text-slate-100",
-          )}
-        >
+      <div className="rounded-xl border border-neutral-800 bg-black/50 p-3 text-sm">
+        <p className="text-xs uppercase tracking-wide text-neutral-500">Your seats</p>
+        <p className="mt-0.5 font-bold text-marquee">{seatLabels.join(", ")}</p>
+      </div>
+
+      <div
+        aria-live="polite"
+        className={cx(
+          "rounded-xl border p-3 text-sm",
+          urgent
+            ? "border-red-500/50 bg-red-500/10 text-red-200"
+            : "border-neutral-800 bg-black/40 text-neutral-300",
+        )}
+      >
+        {urgent ? "Trailers are basically over — decide! " : "Held for you for "}
+        <span className="font-mono text-lg font-bold tabular-nums text-white">
           {formatCountdown(remaining)}
         </span>
-      </p>
+      </div>
 
       <div className="flex gap-2">
         <button
           type="button"
           onClick={onConfirm}
           disabled={confirming || expired}
-          className="flex-1 rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-60"
+          className="flex-1 rounded-xl bg-marquee px-3 py-2.5 text-sm font-bold uppercase tracking-wide text-black transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-marquee focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
         >
-          {confirming ? "Confirming…" : "Confirm"}
+          {confirming ? "Locking it in…" : "Confirm seats"}
         </button>
         <button
           type="button"
           onClick={onRelease}
           disabled={releasing}
-          className="flex-1 rounded-md border border-slate-600 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-60"
+          className="flex-1 rounded-xl border border-neutral-700 px-3 py-2.5 text-sm font-semibold text-neutral-200 transition hover:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
         >
-          {releasing ? "Releasing…" : "Release"}
+          {releasing ? "Letting go…" : "Release"}
         </button>
       </div>
     </aside>
