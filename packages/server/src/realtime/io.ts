@@ -25,7 +25,7 @@ export const createRealtime = (
     Record<string, never>,
     Record<string, never>,
     SocketData
-  >(server, { cors: { origin: env.CLIENT_ORIGIN } });
+  >(server, { cors: { origin: env.CLIENT_ORIGIN, credentials: true } });
 
   io.use((socket, next) => {
     const token = readCookie(socket.handshake.headers.cookie, AUTH_COOKIE_NAME);
