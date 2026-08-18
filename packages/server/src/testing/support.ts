@@ -30,9 +30,17 @@ export const deleteUsers = async (emails: string[]): Promise<void> => {
   await prisma.user.deleteMany({ where: { email: { in: emails } } });
 };
 
+const rowIndexForLabel = (label: string): number => {
+  let n = 0;
+  for (const ch of label) {
+    n = n * 26 + (ch.charCodeAt(0) - 64);
+  }
+  return n - 1;
+};
+
 export const seatIdsForRow = async (rowLabel: string): Promise<string[]> => {
   const seats = await prisma.seat.findMany({
-    where: { rowLabel },
+    where: { rowIndex: rowIndexForLabel(rowLabel) },
     orderBy: { seatNumber: "asc" },
     select: { id: true },
   });

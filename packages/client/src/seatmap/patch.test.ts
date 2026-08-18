@@ -7,10 +7,9 @@ const baseMap: SeatMap = {
   rows: [
     {
       rowLabel: "A",
-      section: "main",
       seats: [
-        { id: "A1", rowLabel: "A", seatNumber: 1, section: "main", status: "available", heldByMe: false, holdExpiresAt: null },
-        { id: "A2", rowLabel: "A", seatNumber: 2, section: "main", status: "available", heldByMe: false, holdExpiresAt: null },
+        { id: "A1", rowLabel: "A", seatNumber: 1, status: "available", heldByMe: false, holdExpiresAt: null },
+        { id: "A2", rowLabel: "A", seatNumber: 2, status: "available", heldByMe: false, holdExpiresAt: null },
       ],
     },
   ],
