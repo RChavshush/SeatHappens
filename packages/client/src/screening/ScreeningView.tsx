@@ -171,7 +171,7 @@ export const ScreeningView = () => {
               <select
                 value={screeningId}
                 onChange={(event) => setSelectedId(event.target.value)}
-                className="max-w-[14rem] rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-marquee focus:outline-none focus:ring-1 focus:ring-marquee/60"
+                className="w-full min-w-[20rem] max-w-[24rem] truncate rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-marquee focus:outline-none focus:ring-1 focus:ring-marquee/60"
               >
                 {screenings.map((s) => (
                   <option key={s.id} value={s.id}>

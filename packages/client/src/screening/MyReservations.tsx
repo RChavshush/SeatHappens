@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cancelReservation, getMyReservations } from "../api/me";
 import { queryKeys } from "../query/keys";
@@ -58,7 +59,8 @@ export const MyReservations = ({ displayName }: MyReservationsProps) => {
         Hey, {displayName}
       </button>
 
-      {open && (
+      {open &&
+        createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -143,8 +145,9 @@ export const MyReservations = ({ displayName }: MyReservationsProps) => {
               </ul>
             )}
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </>
   );
 };
