@@ -23,11 +23,11 @@ const register = async (label: string): Promise<TestUser> => {
 const postHold = (user: TestUser, seatIds: string[]) =>
   request(app)
     .post(`/screenings/${SEED_SCREENING_ID}/holds`)
-    .auth(user.token, { type: "bearer" })
+    .set("Cookie", user.cookie)
     .send({ seatIds });
 
 const confirm = (user: TestUser, holdId: string) =>
-  request(app).post(`/holds/${holdId}/confirm`).auth(user.token, { type: "bearer" });
+  request(app).post(`/holds/${holdId}/confirm`).set("Cookie", user.cookie);
 
 beforeEach(async () => {
   await resetScreeningState(SEED_SCREENING_ID);
