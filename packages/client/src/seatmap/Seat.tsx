@@ -1,10 +1,11 @@
 import { cx } from "../lib/cx";
 import { seatClasses, variantLabel } from "./seatClasses";
 import type { SeatProps } from "./types";
+import { SEAT_VARIANT } from "./variants";
 
 export const Seat = ({ seat, variant, selected, evaluation, onClick }: SeatProps) => {
-  const shown = selected ? "selected" : variant;
-  const stateLabel = selected ? "selected" : variantLabel[variant];
+  const shown = selected ? SEAT_VARIANT.selected : variant;
+  const stateLabel = selected ? SEAT_VARIANT.selected : variantLabel[variant];
   const label = `Row ${seat.rowLabel} seat ${seat.seatNumber}, ${stateLabel}`;
 
   return (

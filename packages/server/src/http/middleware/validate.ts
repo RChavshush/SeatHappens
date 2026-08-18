@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import createError from "http-errors";
 import type { ZodTypeAny } from "zod";
+import { ERROR_CODE } from "@cinema/shared";
 import type { RequestPart } from "../../types.js";
 
 export const validate =
@@ -10,7 +11,7 @@ export const validate =
     if (!result.success) {
       next(
         createError(422, "Request validation failed", {
-          code: "VALIDATION_FAILED",
+          code: ERROR_CODE.VALIDATION_FAILED,
           details: result.error.flatten(),
         }),
       );

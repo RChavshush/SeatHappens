@@ -1,4 +1,6 @@
-export type ToastTone = "success" | "error" | "info";
+import type { TOAST_TONE } from "./tones";
+
+export type ToastTone = (typeof TOAST_TONE)[keyof typeof TOAST_TONE];
 
 export interface Toast {
   id: string;

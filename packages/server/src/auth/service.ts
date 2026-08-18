@@ -1,4 +1,5 @@
 import createError from "http-errors";
+import { ERROR_CODE } from "@cinema/shared";
 import type { AuthResponse, LoginRequest, RegisterRequest } from "@cinema/shared";
 import { prisma } from "../db.js";
 import type { User as DbUser } from "../generated/prisma/index.js";
@@ -13,7 +14,7 @@ const toAuthResponse = (user: DbUser): AuthResponse => ({
 export const register = async (input: RegisterRequest): Promise<AuthResponse> => {
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) {
-    throw createError(409, "Email already registered", { code: "EMAIL_TAKEN" });
+    throw createError(409, "Email already registered", { code: ERROR_CODE.EMAIL_TAKEN });
   }
 
   const passwordHash = await hashPassword(input.password);
@@ -26,7 +27,7 @@ export const register = async (input: RegisterRequest): Promise<AuthResponse> =>
 export const login = async (input: LoginRequest): Promise<AuthResponse> => {
   const user = await prisma.user.findUnique({ where: { email: input.email } });
   if (!user || !(await verifyPassword(input.password, user.passwordHash))) {
-    throw createError(401, "Invalid email or password", { code: "INVALID_CREDENTIALS" });
+    throw createError(401, "Invalid email or password", { code: ERROR_CODE.INVALID_CREDENTIALS });
   }
   return toAuthResponse(user);
 };

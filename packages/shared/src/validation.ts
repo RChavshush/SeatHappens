@@ -1,4 +1,5 @@
-import { isOccupied } from "./seats.js";
+import { RULE_ERROR_CODE } from "./ruleErrorCodes.js";
+import { SEAT_STATE, isOccupied } from "./seats.js";
 import type {
   RowSelection,
   RuleErrorCode,
@@ -19,22 +20,22 @@ export const validateSelection = (
   selection: number[],
 ): ValidationResult => {
   if (selection.length === 0) {
-    return fail("EMPTY_SELECTION", "Select at least one seat.");
+    return fail(RULE_ERROR_CODE.EMPTY_SELECTION, "Select at least one seat.");
   }
 
   for (const i of selection) {
     if (!Number.isInteger(i) || i < 0 || i >= row.length) {
-      return fail("OUT_OF_RANGE", `Seat index ${i} is outside the row.`);
+      return fail(RULE_ERROR_CODE.OUT_OF_RANGE, `Seat index ${i} is outside the row.`);
     }
   }
 
   if (new Set(selection).size !== selection.length) {
-    return fail("DUPLICATE_SEAT", "The selection contains a duplicate seat.");
+    return fail(RULE_ERROR_CODE.DUPLICATE_SEAT, "The selection contains a duplicate seat.");
   }
 
   for (const i of selection) {
     if (isOccupied(row[i]!)) {
-      return fail("SEAT_UNAVAILABLE", `Seat ${i + 1} is already taken.`);
+      return fail(RULE_ERROR_CODE.SEAT_UNAVAILABLE, `Seat ${i + 1} is already taken.`);
     }
   }
 
@@ -42,7 +43,7 @@ export const validateSelection = (
   for (let k = 1; k < sorted.length; k++) {
     if (sorted[k]! !== sorted[k - 1]! + 1) {
       return fail(
-        "NOT_CONSECUTIVE",
+        RULE_ERROR_CODE.NOT_CONSECUTIVE,
         "Selected seats must be consecutive and in the same row.",
       );
     }
@@ -53,7 +54,7 @@ export const validateSelection = (
   for (const idx of after) {
     if (!before.has(idx)) {
       return fail(
-        "ISOLATED_SEAT",
+        RULE_ERROR_CODE.ISOLATED_SEAT,
         "This selection would trap a single empty seat between occupied seats.",
       );
     }
@@ -65,7 +66,7 @@ export const validateSelection = (
 export const validateRows = (rows: RowSelection[]): ValidationResult => {
   const active = rows.filter((r) => r.selection.length > 0);
   if (active.length === 0) {
-    return fail("EMPTY_SELECTION", "Select at least one seat.");
+    return fail(RULE_ERROR_CODE.EMPTY_SELECTION, "Select at least one seat.");
   }
   for (const { row, selection } of active) {
     const result = validateSelection(row, selection);
@@ -73,7 +74,7 @@ export const validateRows = (rows: RowSelection[]): ValidationResult => {
   }
   if (!isConnected(active)) {
     return fail(
-      "NOT_CONSECUTIVE",
+      RULE_ERROR_CODE.NOT_CONSECUTIVE,
       "All selected seats must be next to each other in one group.",
     );
   }
@@ -128,7 +129,7 @@ const applySelection = (
   selection: number[],
 ): SeatState[] => {
   const next = [...row];
-  for (const i of selection) next[i] = "held";
+  for (const i of selection) next[i] = SEAT_STATE.held;
   return next;
 };
 

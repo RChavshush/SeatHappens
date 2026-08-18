@@ -1,7 +1,13 @@
 import { randomUUID } from "node:crypto";
 import createError from "http-errors";
 import type { HttpError } from "http-errors";
-import { validateRows } from "@cinema/shared";
+import {
+  ERROR_CODE,
+  HOLD_STATUS,
+  RULE_ERROR_CODE,
+  SEAT_STATE,
+  validateRows,
+} from "@cinema/shared";
 import type {
   Reservation,
   RowSelection,
@@ -15,19 +21,19 @@ import type { ConfirmResult, HoldMutationResult, ReleaseResult, Tx } from "../ty
 
 const mapRuleError = (code: RuleErrorCode, message: string): HttpError => {
   switch (code) {
-    case "SEAT_UNAVAILABLE":
+    case RULE_ERROR_CODE.SEAT_UNAVAILABLE:
       return createError(409, message, { code });
-    case "NOT_CONSECUTIVE":
-    case "ISOLATED_SEAT":
+    case RULE_ERROR_CODE.NOT_CONSECUTIVE:
+    case RULE_ERROR_CODE.ISOLATED_SEAT:
       return createError(422, message, { code });
     default:
-      return createError(422, message, { code: "VALIDATION_FAILED" });
+      return createError(422, message, { code: ERROR_CODE.VALIDATION_FAILED });
   }
 };
 
 const sweepExpired = async (tx: Tx, screeningId: string): Promise<void> => {
   await tx.$executeRaw`DELETE FROM seat_locks WHERE screening_id = ${screeningId} AND expires_at <= now()`;
-  await tx.$executeRaw`UPDATE seat_holds SET status = 'expired' WHERE screening_id = ${screeningId} AND status = 'active' AND expires_at <= now()`;
+  await tx.$executeRaw`UPDATE seat_holds SET status = ${HOLD_STATUS.expired}::"HoldStatus" WHERE screening_id = ${screeningId} AND status = ${HOLD_STATUS.active}::"HoldStatus" AND expires_at <= now()`;
 };
 
 export const createHold = async (
@@ -45,7 +51,7 @@ export const createHold = async (
 
     const releasedSeatIds: string[] = [];
     const own = await tx.seatHold.findFirst({
-      where: { screeningId, userId, status: "active", expiresAt: { gt: dbNow } },
+      where: { screeningId, userId, status: HOLD_STATUS.active, expiresAt: { gt: dbNow } },
       select: { id: true },
     });
     if (own) {
@@ -55,7 +61,7 @@ export const createHold = async (
       });
       releasedSeatIds.push(...ownLocks.map((l) => l.seatId));
       await tx.seatLock.deleteMany({ where: { holdId: own.id } });
-      await tx.seatHold.update({ where: { id: own.id }, data: { status: "cancelled" } });
+      await tx.seatHold.update({ where: { id: own.id }, data: { status: HOLD_STATUS.cancelled } });
     }
 
     const selected = await tx.seat.findMany({
@@ -63,7 +69,9 @@ export const createHold = async (
       select: { id: true, rowLabel: true },
     });
     if (selected.length !== new Set(seatIds).size) {
-      throw createError(422, "One or more seats do not exist", { code: "VALIDATION_FAILED" });
+      throw createError(422, "One or more seats do not exist", {
+        code: ERROR_CODE.VALIDATION_FAILED,
+      });
     }
 
     const rowLabels = [...new Set(selected.map((s) => s.rowLabel))];
@@ -97,7 +105,11 @@ export const createHold = async (
       const seatsInRow = rowSeats.filter((s) => s.rowLabel === label);
       const selectedInRow = selectedIdsByRow.get(label)!;
       const row: SeatState[] = seatsInRow.map((s) =>
-        bookedSet.has(s.id) ? "booked" : lockedSet.has(s.id) ? "held" : "available",
+        bookedSet.has(s.id)
+          ? SEAT_STATE.booked
+          : lockedSet.has(s.id)
+            ? SEAT_STATE.held
+            : SEAT_STATE.available,
       );
       const selection = seatsInRow
         .map((s, i) => (selectedInRow.has(s.id) ? i : -1))
@@ -110,7 +122,7 @@ export const createHold = async (
 
     try {
       const hold = await tx.seatHold.create({
-        data: { screeningId, userId, status: "active", expiresAt },
+        data: { screeningId, userId, status: HOLD_STATUS.active, expiresAt },
       });
       await tx.seatHoldSeat.createMany({
         data: seatIds.map((seatId) => ({ holdId: hold.id, seatId, screeningId })),
@@ -124,7 +136,7 @@ export const createHold = async (
           screeningId,
           seatIds,
           expiresAt: expiresAt.toISOString(),
-          status: "active",
+          status: HOLD_STATUS.active,
         },
         heldSeatIds: seatIds,
         releasedSeatIds,
@@ -132,7 +144,7 @@ export const createHold = async (
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw createError(409, "One or more seats were just taken", {
-          code: "SEAT_UNAVAILABLE",
+          code: ERROR_CODE.SEAT_UNAVAILABLE,
         });
       }
       throw error;
@@ -169,17 +181,17 @@ export const confirmHold = async (holdId: string, userId: string): Promise<Confi
       SELECT screening_id AS "screeningId", status::text AS status, (expires_at <= now()) AS expired
       FROM seat_holds WHERE id = ${holdId} AND user_id = ${userId} FOR UPDATE`;
     const hold = rows[0];
-    if (!hold) throw createError(404, "Hold not found", { code: "HOLD_NOT_FOUND" });
+    if (!hold) throw createError(404, "Hold not found", { code: ERROR_CODE.HOLD_NOT_FOUND });
 
-    if (hold.status === "confirmed") {
+    if (hold.status === HOLD_STATUS.confirmed) {
       const existing = await loadReservation(tx, holdId);
       return { reservation: existing!.reservation, bookedSeatIds: [], screeningId: hold.screeningId };
     }
 
     await sweepExpired(tx, hold.screeningId);
 
-    if (hold.status !== "active" || hold.expired) {
-      throw createError(410, "Hold has expired", { code: "HOLD_EXPIRED" });
+    if (hold.status !== HOLD_STATUS.active || hold.expired) {
+      throw createError(410, "Hold has expired", { code: ERROR_CODE.HOLD_EXPIRED });
     }
 
     const holdSeats = await tx.seatHoldSeat.findMany({
@@ -204,7 +216,7 @@ export const confirmHold = async (holdId: string, userId: string): Promise<Confi
           screeningId: hold.screeningId,
         })),
       });
-      await tx.seatHold.update({ where: { id: holdId }, data: { status: "confirmed" } });
+      await tx.seatHold.update({ where: { id: holdId }, data: { status: HOLD_STATUS.confirmed } });
       await tx.seatLock.deleteMany({ where: { holdId } });
 
       return {
@@ -221,7 +233,7 @@ export const confirmHold = async (holdId: string, userId: string): Promise<Confi
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw createError(409, "One or more seats were just booked", {
-          code: "SEAT_UNAVAILABLE",
+          code: ERROR_CODE.SEAT_UNAVAILABLE,
         });
       }
       throw error;
@@ -234,15 +246,15 @@ export const releaseHold = async (holdId: string, userId: string): Promise<Relea
       where: { id: holdId, userId },
       select: { id: true, screeningId: true, status: true },
     });
-    if (!hold) throw createError(404, "Hold not found", { code: "HOLD_NOT_FOUND" });
+    if (!hold) throw createError(404, "Hold not found", { code: ERROR_CODE.HOLD_NOT_FOUND });
 
-    if (hold.status === "confirmed") {
+    if (hold.status === HOLD_STATUS.confirmed) {
       throw createError(409, "Cannot release a confirmed reservation", {
-        code: "HOLD_ALREADY_CONFIRMED",
+        code: ERROR_CODE.HOLD_ALREADY_CONFIRMED,
       });
     }
 
-    if (hold.status !== "active") {
+    if (hold.status !== HOLD_STATUS.active) {
       return { screeningId: hold.screeningId, releasedSeatIds: [] };
     }
 
@@ -251,7 +263,7 @@ export const releaseHold = async (holdId: string, userId: string): Promise<Relea
       select: { seatId: true },
     });
     await tx.seatLock.deleteMany({ where: { holdId } });
-    await tx.seatHold.update({ where: { id: holdId }, data: { status: "cancelled" } });
+    await tx.seatHold.update({ where: { id: holdId }, data: { status: HOLD_STATUS.cancelled } });
 
     return { screeningId: hold.screeningId, releasedSeatIds: locks.map((l) => l.seatId) };
   });

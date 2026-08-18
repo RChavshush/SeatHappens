@@ -8,10 +8,11 @@ import { ApiError } from "../api/errors";
 import { fieldErrors } from "../lib/formErrors";
 import type { AuthMode, FieldErrors } from "../types";
 import { useAuth } from "./AuthContext";
+import { AUTH_MODE } from "./modes";
 
 export const AuthScreen = () => {
   const { signIn } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("login");
+  const [mode, setMode] = useState<AuthMode>(AUTH_MODE.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -19,7 +20,7 @@ export const AuthScreen = () => {
 
   const mutation = useMutation({
     mutationFn: (payload: LoginRequest | RegisterRequest) =>
-      mode === "login"
+      mode === AUTH_MODE.login
         ? login(payload as LoginRequest)
         : register(payload as RegisterRequest),
     onSuccess: signIn,
@@ -28,7 +29,7 @@ export const AuthScreen = () => {
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     const parsed =
-      mode === "login"
+      mode === AUTH_MODE.login
         ? loginRequestSchema.safeParse({ email, password })
         : registerRequestSchema.safeParse({ email, password, displayName });
 
@@ -69,7 +70,7 @@ export const AuthScreen = () => {
           className="space-y-4 rounded-2xl border border-neutral-800 bg-neutral-950/80 p-6 shadow-xl shadow-black/40 backdrop-blur"
         >
           <h2 className="text-lg font-bold text-white">
-            {mode === "login" ? "Welcome back" : "Join the club"}
+            {mode === AUTH_MODE.login ? "Welcome back" : "Join the club"}
           </h2>
 
         <Field
@@ -86,9 +87,9 @@ export const AuthScreen = () => {
           value={password}
           error={errors.password}
           onChange={setPassword}
-          autoComplete={mode === "login" ? "current-password" : "new-password"}
+          autoComplete={mode === AUTH_MODE.login ? "current-password" : "new-password"}
         />
-        {mode === "register" && (
+        {mode === AUTH_MODE.register && (
           <Field
             label="Display name"
             type="text"
@@ -112,17 +113,17 @@ export const AuthScreen = () => {
           >
             {mutation.isPending
               ? "Rolling the reel…"
-              : mode === "login"
+              : mode === AUTH_MODE.login
                 ? "Take my seat"
                 : "Sign me up"}
           </button>
 
           <button
             type="button"
-            onClick={() => switchMode(mode === "login" ? "register" : "login")}
+            onClick={() => switchMode(mode === AUTH_MODE.login ? AUTH_MODE.register : AUTH_MODE.login)}
             className="w-full text-sm text-neutral-400 transition hover:text-marquee"
           >
-            {mode === "login"
+            {mode === AUTH_MODE.login
               ? "New here? Create an account"
               : "Already have an account? Sign in"}
           </button>

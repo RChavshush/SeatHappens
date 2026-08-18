@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { HOLD_STATUS } from "@cinema/shared";
 import type { Hold } from "@cinema/shared";
 import { reconcileHold } from "./reconcile";
 
@@ -7,7 +8,7 @@ const holdWith = (seatIds: string[]): Hold => ({
   screeningId: "s1",
   seatIds,
   expiresAt: "2026-08-18T12:00:00.000Z",
-  status: "active",
+  status: HOLD_STATUS.active,
 });
 
 describe("reconcileHold", () => {

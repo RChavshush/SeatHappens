@@ -1,3 +1,4 @@
+import { HOLD_STATUS } from "@cinema/shared";
 import { prisma } from "../db.js";
 import { availableDeltas, broadcastSeatUpdates } from "../realtime/emitter.js";
 
@@ -7,7 +8,7 @@ export const runExpirySweep = async (): Promise<void> => {
   const released = await prisma.$queryRaw<{ screeningId: string; seatId: string }[]>`
     DELETE FROM seat_locks WHERE expires_at <= now()
     RETURNING screening_id AS "screeningId", seat_id AS "seatId"`;
-  await prisma.$executeRaw`UPDATE seat_holds SET status = 'expired' WHERE status = 'active' AND expires_at <= now()`;
+  await prisma.$executeRaw`UPDATE seat_holds SET status = ${HOLD_STATUS.expired}::"HoldStatus" WHERE status = ${HOLD_STATUS.active}::"HoldStatus" AND expires_at <= now()`;
 
   if (released.length === 0) return;
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { SEAT_SECTIONS, SEAT_STATES } from "./seats.js";
+import { HOLD_STATUS } from "./holdStatus.js";
+import { SEAT_SECTIONS, SEAT_STATE } from "./seats.js";
 
 export const emailSchema = z.string().trim().toLowerCase().email();
 export const passwordSchema = z.string().min(8).max(100);
@@ -32,7 +33,7 @@ export const screeningSchema = z.object({
   startsAt: z.string().datetime(),
 });
 
-export const seatStateSchema = z.enum(SEAT_STATES);
+export const seatStateSchema = z.nativeEnum(SEAT_STATE);
 export const seatSectionSchema = z.enum(SEAT_SECTIONS);
 
 export const seatViewSchema = z.object({
@@ -65,7 +66,7 @@ export const holdSchema = z.object({
   screeningId: z.string(),
   seatIds: z.array(z.string()),
   expiresAt: z.string().datetime(),
-  status: z.enum(["active", "confirmed", "cancelled", "expired"]),
+  status: z.nativeEnum(HOLD_STATUS),
 });
 
 export const reservationSchema = z.object({

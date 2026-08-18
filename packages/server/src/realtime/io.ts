@@ -1,5 +1,6 @@
 import type { Server as HttpServer } from "node:http";
 import { Server } from "socket.io";
+import { SOCKET_EVENTS } from "@cinema/shared";
 import type { SeatsUpdatedEvent } from "@cinema/shared";
 import { verifyToken } from "../auth/jwt.js";
 import { env } from "../env.js";
@@ -43,12 +44,12 @@ export const createRealtime = (
     const initial = (socket.handshake.auth as { screeningId?: unknown }).screeningId;
     if (typeof initial === "string") socket.join(roomFor(initial));
 
-    socket.on("screening:subscribe", (payload: unknown, ack?: () => void) => {
+    socket.on(SOCKET_EVENTS.subscribe, (payload: unknown, ack?: () => void) => {
       const screeningId = (payload as { screeningId?: unknown })?.screeningId;
       if (typeof screeningId === "string") socket.join(roomFor(screeningId));
       ack?.();
     });
-    socket.on("screening:unsubscribe", (payload: unknown, ack?: () => void) => {
+    socket.on(SOCKET_EVENTS.unsubscribe, (payload: unknown, ack?: () => void) => {
       const screeningId = (payload as { screeningId?: unknown })?.screeningId;
       if (typeof screeningId === "string") socket.leave(roomFor(screeningId));
       ack?.();
@@ -62,5 +63,5 @@ export const makeBroadcaster =
   (io: Server<Record<string, never>, Record<string, never>, Record<string, never>, SocketData>): SeatBroadcaster =>
   (screeningId, seats) => {
     const event: SeatsUpdatedEvent = { screeningId, seats };
-    io.to(roomFor(screeningId)).emit("seats:updated", event);
+    io.to(roomFor(screeningId)).emit(SOCKET_EVENTS.seatsUpdated, event);
   };
