@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express } from "express";
 import { authGuard } from "../auth/guard.js";
@@ -11,7 +12,8 @@ import { screeningsRouter } from "./routes/screenings.js";
 export const buildApp = (): Express => {
   const app = express();
 
-  app.use(cors({ origin: env.CLIENT_ORIGIN }));
+  app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
+  app.use(cookieParser());
   app.use(express.json());
 
   app.get("/health", (_req, res) => {

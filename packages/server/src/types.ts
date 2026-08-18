@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { Hold, Reservation, SeatsUpdatedEvent } from "@cinema/shared";
+import type { Hold, Reservation, SeatsUpdatedEvent, User } from "@cinema/shared";
 import type { envSchema } from "./env.js";
 import type { Prisma } from "./generated/prisma/index.js";
 
@@ -42,6 +42,11 @@ export interface AuthUserContext {
 export interface AuthTokenPayload {
   sub: string;
   email: string;
+}
+
+export interface AuthResult {
+  token: string;
+  user: User;
 }
 
 export interface SeatOccupancy {

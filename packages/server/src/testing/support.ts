@@ -5,7 +5,7 @@ import { prisma } from "../db.js";
 export const SEED_SCREENING_ID = "seed-screening";
 
 export interface TestUser {
-  token: string;
+  cookie: string;
   userId: string;
   email: string;
 }
@@ -18,7 +18,9 @@ export const registerUser = async (app: Express, label: string): Promise<TestUse
   if (res.status !== 201) {
     throw new Error(`register failed: ${res.status} ${JSON.stringify(res.body)}`);
   }
-  return { token: res.body.token, userId: res.body.user.id, email };
+  const setCookie = res.headers["set-cookie"];
+  const cookie = Array.isArray(setCookie) ? setCookie[0]!.split(";")[0]! : "";
+  return { cookie, userId: res.body.user.id, email };
 };
 
 export const resetScreeningState = async (screeningId: string): Promise<void> => {

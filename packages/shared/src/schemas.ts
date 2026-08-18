@@ -22,7 +22,6 @@ export const userSchema = z.object({
 });
 
 export const authResponseSchema = z.object({
-  token: z.string(),
   user: userSchema,
 });
 

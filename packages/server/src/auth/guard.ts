@@ -1,16 +1,17 @@
 import type { NextFunction, Request, Response } from "express";
 import createError from "http-errors";
+import { AUTH_COOKIE_NAME } from "./cookie.js";
 import { verifyToken } from "./jwt.js";
 
 export const authGuard = (req: Request, _res: Response, next: NextFunction): void => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) {
-    next(createError(401, "Missing or malformed Authorization header", { code: "UNAUTHENTICATED" }));
+  const token = req.cookies?.[AUTH_COOKIE_NAME];
+  if (typeof token !== "string" || token.length === 0) {
+    next(createError(401, "Missing authentication cookie", { code: "UNAUTHENTICATED" }));
     return;
   }
 
   try {
-    const payload = verifyToken(header.slice("Bearer ".length));
+    const payload = verifyToken(token);
     req.user = { id: payload.sub, email: payload.email };
     next();
   } catch {
