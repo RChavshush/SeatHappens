@@ -16,8 +16,8 @@ export const seatClasses: Record<SeatVariant, string> = {
 
 export const variantLabel: Record<SeatVariant, string> = {
   available: "available",
-  held: "held by another user",
-  mine: "held by you",
+  held: "Reserved (another user)",
+  mine: "Reserved (you)",
   booked: "booked",
   selected: "selected",
 };
