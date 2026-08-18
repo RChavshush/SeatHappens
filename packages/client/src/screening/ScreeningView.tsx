@@ -17,7 +17,7 @@ import { useSeatUpdates } from "../socket/useSeatUpdates";
 import { useErrorToast, useToasts } from "../toast/ToastContext";
 import { TOAST_TONE } from "../toast/tones";
 
-const HOLD_DEBOUNCE_MS = 400;
+const HOLD_DEBOUNCE_MS = 150;
 
 export const ScreeningView = () => {
   const { user } = useAuth();
