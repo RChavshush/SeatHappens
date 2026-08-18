@@ -66,7 +66,7 @@ export const HoldPanel = ({
           type="button"
           onClick={onConfirm}
           disabled={confirming || expired}
-          className="flex-1 rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-60"
+          className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-3 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-900/40 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-60"
         >
           {confirming ? "Locking it in…" : "Confirm seats"}
         </button>

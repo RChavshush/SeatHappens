@@ -15,7 +15,7 @@ export const App = () => {
             🎬
           </span>
           <div className="leading-tight">
-            <h1 className="text-lg font-bold tracking-tight text-slate-100">The Corner Cinema</h1>
+            <h1 className="text-gradient-brand text-lg font-bold tracking-tight">The Corner Cinema</h1>
             <p className="text-[0.65rem] uppercase tracking-widest text-marquee">
               Now booking · no bad seats
             </p>

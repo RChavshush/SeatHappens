@@ -55,7 +55,7 @@ export const AuthScreen = () => {
           <div aria-hidden="true" className="text-4xl">
             🎬🍿
           </div>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-100">
+          <h1 className="text-gradient-brand mt-2 text-2xl font-bold tracking-tight">
             The Corner Cinema
           </h1>
           <p className="mt-1 text-sm text-marquee">
@@ -108,7 +108,7 @@ export const AuthScreen = () => {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="w-full rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-60"
+            className="w-full rounded-xl bg-gradient-to-r from-fuchsia-600 via-violet-600 to-sky-500 px-4 py-2.5 font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-60"
           >
             {mutation.isPending
               ? "Rolling the reel…"
@@ -150,7 +150,7 @@ const Field = ({ label, type, value, error, autoComplete, onChange }: FieldProps
       autoComplete={autoComplete}
       onChange={(event) => onChange(event.target.value)}
       aria-invalid={error ? true : undefined}
-      className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none"
+      className="w-full rounded-md border border-slate-700 bg-slate-800/80 px-3 py-2 text-slate-100 focus:border-fuchsia-500 focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50"
     />
     {error && <span className="text-xs text-red-400">{error}</span>}
   </label>
