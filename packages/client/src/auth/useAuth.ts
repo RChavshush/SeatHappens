@@ -33,7 +33,7 @@ export const useAuth = (): Auth => {
 
   return {
     user: meQuery.data ?? null,
-    isLoading: meQuery.isPending,
+    isLoading: meQuery.isPending && !meQuery.isFetched,
     signIn,
     signOut,
   };
