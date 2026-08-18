@@ -20,7 +20,7 @@ afterAll(async () => {
 
 describe("seat map", () => {
   it("lists screenings", async () => {
-    const res = await request(app).get("/screenings").auth(viewer.token, { type: "bearer" });
+    const res = await request(app).get("/screenings").set("Cookie", viewer.cookie);
     expect(res.status).toBe(200);
     expect(res.body.length).toBeGreaterThanOrEqual(1);
     expect(res.body[0]).toHaveProperty("movieTitle");
@@ -29,7 +29,7 @@ describe("seat map", () => {
   it("returns 13 rows and 115 seats, all available on a clean screening", async () => {
     const res = await request(app)
       .get(`/screenings/${SEED_SCREENING_ID}/seatmap`)
-      .auth(viewer.token, { type: "bearer" });
+      .set("Cookie", viewer.cookie);
 
     expect(res.status).toBe(200);
     expect(res.body.rows).toHaveLength(13);
@@ -41,7 +41,7 @@ describe("seat map", () => {
   it("404s an unknown screening", async () => {
     const res = await request(app)
       .get("/screenings/does-not-exist/seatmap")
-      .auth(viewer.token, { type: "bearer" });
+      .set("Cookie", viewer.cookie);
     expect(res.status).toBe(404);
     expect(res.body.code).toBe("SCREENING_NOT_FOUND");
   });
