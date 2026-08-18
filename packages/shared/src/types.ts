@@ -2,7 +2,7 @@ import type { z } from "zod";
 import type { ERROR_CODE } from "./errorCodes.js";
 import type { HOLD_STATUS } from "./holdStatus.js";
 import type { RULE_ERROR_CODE } from "./ruleErrorCodes.js";
-import type { SEAT_SECTIONS, SEAT_STATE } from "./seats.js";
+import type { SEAT_STATE } from "./seats.js";
 import type {
   authResponseSchema,
   createHoldRequestSchema,
@@ -20,7 +20,6 @@ import type {
 } from "./schemas.js";
 
 export type SeatState = (typeof SEAT_STATE)[keyof typeof SEAT_STATE];
-export type SeatSection = (typeof SEAT_SECTIONS)[number];
 
 export type HoldStatus = (typeof HOLD_STATUS)[keyof typeof HOLD_STATUS];
 export type ErrorCode = (typeof ERROR_CODE)[keyof typeof ERROR_CODE];
@@ -43,17 +42,14 @@ export type ErrorResponse = z.infer<typeof errorResponseSchema>;
 
 export type SeatsUpdatedEvent = z.infer<typeof seatsUpdatedEventSchema>;
 
-export interface LayoutSectionConfig {
-  section: SeatSection;
+export interface LayoutBlock {
   rows: number;
   seatsPerRow: number;
 }
 
 export interface SeatBlueprint {
-  rowLabel: string;
   rowIndex: number;
   seatNumber: number;
-  section: SeatSection;
 }
 
 export interface RowSelection {

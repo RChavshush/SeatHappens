@@ -1,11 +1,11 @@
 import type {
-  LayoutSectionConfig,
+  LayoutBlock,
   SeatBlueprint,
 } from "./types.js";
 
-export const CINEMA_LAYOUT: LayoutSectionConfig[] = [
-  { section: "main", rows: 10, seatsPerRow: 10 },
-  { section: "balcony", rows: 3, seatsPerRow: 5 },
+export const CINEMA_LAYOUT: LayoutBlock[] = [
+  { rows: 10, seatsPerRow: 10 },
+  { rows: 3, seatsPerRow: 5 },
 ];
 
 export const rowLabel = (index: number): string => {
@@ -19,15 +19,14 @@ export const rowLabel = (index: number): string => {
 };
 
 export const buildSeatLayout = (
-  layout: LayoutSectionConfig[],
+  layout: LayoutBlock[],
 ): SeatBlueprint[] => {
   const seats: SeatBlueprint[] = [];
   let rowIndex = 0;
-  for (const { section, rows, seatsPerRow } of layout) {
+  for (const { rows, seatsPerRow } of layout) {
     for (let r = 0; r < rows; r++) {
-      const label = rowLabel(rowIndex);
       for (let seatNumber = 1; seatNumber <= seatsPerRow; seatNumber++) {
-        seats.push({ rowLabel: label, rowIndex, seatNumber, section });
+        seats.push({ rowIndex, seatNumber });
       }
       rowIndex++;
     }

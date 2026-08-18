@@ -10,9 +10,6 @@ interface SeatMapProps {
 }
 
 export const SeatMap = ({ seatMap, selected, onSeatClick }: SeatMapProps) => {
-  const main = seatMap.rows.filter((row) => row.section === "main");
-  const balcony = seatMap.rows.filter((row) => row.section === "balcony");
-
   const renderRow = (row: SeatMapRow) => (
     <div key={row.rowLabel} className="flex items-center gap-1.5">
       <span className="w-5 shrink-0 text-right text-xs font-semibold text-neutral-500">
@@ -49,15 +46,7 @@ export const SeatMap = ({ seatMap, selected, onSeatClick }: SeatMapProps) => {
             </p>
           </div>
 
-          <div className="flex flex-col gap-1.5">{main.map(renderRow)}</div>
-
-          <div className="flex w-full items-center gap-3 text-[0.65rem] font-semibold uppercase tracking-widest text-neutral-500">
-            <span className="h-px flex-1 bg-neutral-800" />
-            Balcony · the fancy seats
-            <span className="h-px flex-1 bg-neutral-800" />
-          </div>
-
-          <div className="flex flex-col gap-1.5">{balcony.map(renderRow)}</div>
+          <div className="flex flex-col gap-1.5">{seatMap.rows.map(renderRow)}</div>
         </div>
       </div>
     </div>

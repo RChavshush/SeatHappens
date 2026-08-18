@@ -6,7 +6,6 @@ const seat = (rowLabel: string, seatNumber: number, status: SeatState, heldByMe 
   id: `${rowLabel}${seatNumber}`,
   rowLabel,
   seatNumber,
-  section: "main",
   status,
   heldByMe,
   holdExpiresAt: null,
@@ -14,7 +13,6 @@ const seat = (rowLabel: string, seatNumber: number, status: SeatState, heldByMe 
 
 const buildRow = (rowLabel: string, statuses: SeatState[]): SeatMapRow => ({
   rowLabel,
-  section: "main",
   seats: statuses.map((status, index) => seat(rowLabel, index + 1, status)),
 });
 

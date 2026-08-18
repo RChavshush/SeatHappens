@@ -58,16 +58,14 @@ model Screening {
 
 model Seat {
   id         String @id @default(cuid())
-  rowLabel   String @map("row_label")
   rowIndex   Int    @map("row_index")
   seatNumber Int    @map("seat_number")
-  section    String
 
   holdSeats        SeatHoldSeat[]
   locks            SeatLock[]
   reservationSeats ReservationSeat[]
 
-  @@unique([rowLabel, seatNumber])
+  @@unique([rowIndex, seatNumber])
   @@map("seats")
 }
 

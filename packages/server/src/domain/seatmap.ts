@@ -1,6 +1,6 @@
 import createError from "http-errors";
-import { ERROR_CODE, SEAT_STATE } from "@cinema/shared";
-import type { SeatMap, SeatMapRow, SeatSection, SeatState, SeatView } from "@cinema/shared";
+import { ERROR_CODE, SEAT_STATE, rowLabel } from "@cinema/shared";
+import type { SeatMap, SeatMapRow, SeatState, SeatView } from "@cinema/shared";
 import { prisma } from "../db.js";
 import type { AuthUserContext } from "../types.js";
 
@@ -25,8 +25,9 @@ export const buildSeatMap = async (
   const bookedSeatIds = new Set(reservationSeats.map((r) => r.seatId));
   const lockBySeatId = new Map(locks.map((lock) => [lock.seatId, lock]));
 
-  const rowsByLabel = new Map<string, SeatMapRow>();
+  const rowsByIndex = new Map<number, SeatMapRow>();
   for (const seat of seats) {
+    const label = rowLabel(seat.rowIndex);
     let status: SeatState = SEAT_STATE.available;
     let heldByMe = false;
     let holdExpiresAt: string | null = null;
@@ -44,21 +45,20 @@ export const buildSeatMap = async (
 
     const view: SeatView = {
       id: seat.id,
-      rowLabel: seat.rowLabel,
+      rowLabel: label,
       seatNumber: seat.seatNumber,
-      section: seat.section as SeatSection,
       status,
       heldByMe,
       holdExpiresAt,
     };
 
-    let row = rowsByLabel.get(seat.rowLabel);
+    let row = rowsByIndex.get(seat.rowIndex);
     if (!row) {
-      row = { rowLabel: seat.rowLabel, section: seat.section as SeatSection, seats: [] };
-      rowsByLabel.set(seat.rowLabel, row);
+      row = { rowLabel: label, seats: [] };
+      rowsByIndex.set(seat.rowIndex, row);
     }
     row.seats.push(view);
   }
 
-  return { screeningId, rows: [...rowsByLabel.values()] };
+  return { screeningId, rows: [...rowsByIndex.values()] };
 };

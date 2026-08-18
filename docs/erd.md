@@ -33,10 +33,8 @@ expired expired
 
   "seats" {
     String id "🗝️"
-    String row_label 
     Int row_index 
     Int seat_number 
-    String section 
     }
   
 

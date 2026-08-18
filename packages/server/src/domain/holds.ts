@@ -69,7 +69,7 @@ export const createHold = async (
 
     const selected = await tx.seat.findMany({
       where: { id: { in: seatIds } },
-      select: { id: true, rowLabel: true },
+      select: { id: true, rowIndex: true },
     });
     if (selected.length !== new Set(seatIds).size) {
       throw createError(422, "One or more seats do not exist", {
@@ -77,18 +77,18 @@ export const createHold = async (
       });
     }
 
-    const rowLabels = [...new Set(selected.map((s) => s.rowLabel))];
-    const selectedIdsByRow = new Map<string, Set<string>>();
+    const rowIndexes = [...new Set(selected.map((s) => s.rowIndex))];
+    const selectedIdsByRow = new Map<number, Set<string>>();
     for (const seat of selected) {
-      const set = selectedIdsByRow.get(seat.rowLabel) ?? new Set<string>();
+      const set = selectedIdsByRow.get(seat.rowIndex) ?? new Set<string>();
       set.add(seat.id);
-      selectedIdsByRow.set(seat.rowLabel, set);
+      selectedIdsByRow.set(seat.rowIndex, set);
     }
 
     const rowSeats = await tx.seat.findMany({
-      where: { rowLabel: { in: rowLabels } },
-      orderBy: [{ rowLabel: "asc" }, { seatNumber: "asc" }],
-      select: { id: true, rowLabel: true, rowIndex: true },
+      where: { rowIndex: { in: rowIndexes } },
+      orderBy: [{ rowIndex: "asc" }, { seatNumber: "asc" }],
+      select: { id: true, rowIndex: true },
     });
     const allRowSeatIds = rowSeats.map((s) => s.id);
     const [booked, locked] = await Promise.all([
@@ -104,9 +104,9 @@ export const createHold = async (
     const bookedSet = new Set(booked.map((b) => b.seatId));
     const lockedSet = new Set(locked.map((l) => l.seatId));
 
-    const rowSelections: RowSelection[] = rowLabels.map((label) => {
-      const seatsInRow = rowSeats.filter((s) => s.rowLabel === label);
-      const selectedInRow = selectedIdsByRow.get(label)!;
+    const rowSelections: RowSelection[] = rowIndexes.map((index) => {
+      const seatsInRow = rowSeats.filter((s) => s.rowIndex === index);
+      const selectedInRow = selectedIdsByRow.get(index)!;
       const row: SeatState[] = seatsInRow.map((s) =>
         bookedSet.has(s.id)
           ? SEAT_STATE.booked
