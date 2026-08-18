@@ -1,10 +1,30 @@
-import { useAuth } from "./auth/AuthContext";
+import { useEffect } from "react";
+import { setUnauthorizedHandler } from "./api/authEvents";
+import { useAuth } from "./auth/useAuth";
 import { AuthScreen } from "./auth/AuthScreen";
 import { ScreeningView } from "./screening/ScreeningView";
 
-export const App = () => {
-  const { user, signOut } = useAuth();
+const LoadingScreen = () => (
+  <div className="flex min-h-full items-center justify-center" role="status" aria-live="polite">
+    <div className="flex items-center gap-3 text-neutral-400">
+      <span
+        aria-hidden="true"
+        className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-700 border-t-marquee"
+      />
+      <span className="text-sm">Loading…</span>
+    </div>
+  </div>
+);
 
+export const App = () => {
+  const { user, isLoading, signOut } = useAuth();
+
+  useEffect(() => {
+    setUnauthorizedHandler(signOut);
+    return () => setUnauthorizedHandler(null);
+  }, [signOut]);
+
+  if (isLoading) return <LoadingScreen />;
   if (!user) return <AuthScreen />;
 
   return (

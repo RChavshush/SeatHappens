@@ -1,10 +1,17 @@
 import { Router } from "express";
-import { getCurrentHold, listReservations } from "../../domain/me.js";
+import { getCurrentHold, getMe, listReservations } from "../../domain/me.js";
 import { asyncHandler } from "../async-handler.js";
 import { validate } from "../middleware/validate.js";
 import { screeningIdQuerySchema } from "../params.js";
 
 export const meRouter = Router();
+
+meRouter.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    res.json(await getMe(req.user!.id));
+  }),
+);
 
 meRouter.get(
   "/hold",
