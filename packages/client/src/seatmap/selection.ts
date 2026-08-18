@@ -48,7 +48,11 @@ export const evaluateSeat = (
   if (isOccupied(seat.status)) {
     return {
       disabled: true,
-      reason: seat.heldByMe ? "You are holding this seat." : "This seat is taken.",
+      reason: seat.heldByMe
+        ? "This one's yours already."
+        : seat.bookedByMe
+          ? "You already booked this seat."
+          : "Taken — too slow.",
     };
   }
 

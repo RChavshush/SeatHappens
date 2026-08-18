@@ -3,6 +3,7 @@ import type { Hold } from "@cinema/shared";
 import { cx } from "../lib/cx";
 import { formatCountdown } from "../lib/time";
 import { useCountdown } from "../hooks/useCountdown";
+import { Icon } from "../ui/Icon";
 
 interface HoldPanelProps {
   hold: Hold;
@@ -33,50 +34,52 @@ export const HoldPanel = ({
   const urgent = remaining <= 60_000;
 
   return (
-    <aside className="space-y-4 rounded-2xl border border-marquee/40 bg-neutral-950/80 p-5 shadow-lg shadow-black/40 backdrop-blur">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black uppercase tracking-tight text-white">Seats on hold</h2>
-        <span aria-hidden="true" className="text-xl">
-          🍿
-        </span>
-      </div>
+    <aside className="space-y-4">
+      <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
+        <Icon name="ticket" className="h-5 w-5 text-red" />
+        Seats on hold
+      </h2>
 
-      <div className="rounded-xl border border-neutral-800 bg-black/50 p-3 text-sm">
-        <p className="text-xs uppercase tracking-wide text-neutral-500">Your seats</p>
-        <p className="mt-0.5 font-bold text-marquee">{seatLabels.join(", ")}</p>
+      <div className="rounded-xl border border-hairline bg-white/[0.03] p-3">
+        <p className="text-[10px] uppercase tracking-[0.12em] text-neutral-500">Your seats</p>
+        <p className="mt-1 font-mono text-lg font-bold text-red-soft">{seatLabels.join(", ")}</p>
       </div>
 
       <div
         aria-live="polite"
         className={cx(
-          "rounded-xl border p-3 text-sm",
+          "flex items-center gap-2 rounded-xl border p-3 text-sm",
           urgent
-            ? "border-red-500/50 bg-red-500/10 text-red-200"
-            : "border-neutral-800 bg-black/40 text-neutral-300",
+            ? "border-red/50 bg-red/10 text-red-soft"
+            : "border-hairline bg-white/[0.02] text-neutral-300",
         )}
       >
-        {urgent ? "Trailers are basically over — decide! " : "Held for you for "}
-        <span className="font-mono text-lg font-bold tabular-nums text-white">
+        <Icon name="clock" className="h-4 w-4 shrink-0" />
+        <span className="min-w-0 flex-1">
+          {urgent ? "Trailers are basically over — decide!" : "Your seat is getting impatient."}
+        </span>
+        <span className="font-mono text-base font-bold tabular-nums text-white">
           {formatCountdown(remaining)}
         </span>
       </div>
 
-      <div className="flex gap-2">
+      <div className="space-y-2">
         <button
           type="button"
           onClick={onConfirm}
           disabled={confirming || expired}
-          className="flex-1 rounded-xl bg-marquee px-3 py-2.5 text-sm font-bold uppercase tracking-wide text-black transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-marquee focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-red px-3 py-3 text-sm font-bold text-white transition hover:bg-red-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-red-soft focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:opacity-60"
         >
-          {confirming ? "Locking it in…" : "Confirm seats"}
+          {!confirming && <Icon name="check" className="h-4 w-4" />}
+          {confirming ? "Reserving your seats…" : "Claim my seats"}
         </button>
         <button
           type="button"
           onClick={onRelease}
           disabled={releasing}
-          className="flex-1 rounded-xl border border-neutral-700 px-3 py-2.5 text-sm font-semibold text-neutral-200 transition hover:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
+          className="w-full rounded-xl border border-hairline px-3 py-2.5 text-sm font-semibold text-neutral-300 transition hover:border-neutral-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:opacity-60"
         >
-          {releasing ? "Letting go…" : "Release"}
+          {releasing ? "Letting go…" : "Abandon seat"}
         </button>
       </div>
     </aside>

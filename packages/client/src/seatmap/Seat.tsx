@@ -19,12 +19,12 @@ export const Seat = ({ seat, variant, selected, evaluation, onClick }: SeatProps
       }
       aria-pressed={selected}
       className={cx(
-        "h-8 w-8 shrink-0 rounded-t-lg rounded-b-sm text-xs font-medium tabular-nums transition duration-150",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-marquee",
+        "h-9 w-9 shrink-0 rounded-[9px] font-mono text-[11px] font-bold tabular-nums transition duration-150",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink focus-visible:ring-red-soft",
         seatClasses[shown],
-        evaluation.disabled && !selected && "cursor-not-allowed opacity-40",
+        evaluation.disabled && !selected && "cursor-not-allowed opacity-45",
         !evaluation.disabled &&
-          "hover:brightness-125 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 motion-safe:active:scale-95",
+          "hover:brightness-110 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 motion-safe:active:scale-95",
         selected && "motion-safe:-translate-y-0.5",
       )}
     >

@@ -2,21 +2,22 @@ import { cx } from "../lib/cx";
 import { seatClasses, variantLabel } from "./seatClasses";
 import { SEAT_VARIANT } from "./variants";
 
-const LEGEND = Object.values(SEAT_VARIANT);
+const LEGEND = [SEAT_VARIANT.available, SEAT_VARIANT.held, SEAT_VARIANT.booked];
 
 export const Legend = () => (
-  <ul className="flex flex-wrap gap-2 text-sm text-neutral-300">
+  <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-neutral-400">
     {LEGEND.map((variant) => (
-      <li
-        key={variant}
-        className="flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950/60 px-3 py-1 text-neutral-300"
-      >
+      <li key={variant} className="flex items-center gap-2">
         <span
-          className={cx("h-4 w-4 rounded-t-md rounded-b-sm", seatClasses[variant])}
+          className={cx("h-3.5 w-3.5 rounded-[5px]", seatClasses[variant])}
           aria-hidden="true"
         />
-        <span className="capitalize">{variantLabel[variant]}</span>
+        <span>{variantLabel[variant]}</span>
       </li>
     ))}
+    <li className="flex items-center gap-2 text-neutral-500">
+      <span className={cx("h-3.5 w-3.5 rounded-[5px]", seatClasses.mine)} aria-hidden="true" />
+      <span>Your picks glow red</span>
+    </li>
   </ul>
 );

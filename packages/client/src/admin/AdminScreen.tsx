@@ -56,7 +56,7 @@ export const AdminScreen = () => {
     onSuccess: (screening) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.screenings });
       queryClient.invalidateQueries({ queryKey: queryKeys.movies });
-      push(TOAST_TONE.success, `Screening added: ${screening.movieTitle}. 🎬`);
+      push(TOAST_TONE.success, `Screening added: ${screening.movieTitle}.`);
       resetForm();
     },
     onError: showError,
@@ -96,20 +96,18 @@ export const AdminScreen = () => {
   return (
     <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
       <section>
-        <h2 className="mb-4 text-lg font-black uppercase tracking-tight text-white">
-          Add a screening
-        </h2>
+        <h2 className="mb-4 text-lg font-bold tracking-tight text-white">Add a screening</h2>
         <form
           onSubmit={onSubmit}
           noValidate
-          className="space-y-4 rounded-2xl border border-neutral-800 bg-neutral-950/80 p-6 shadow-xl shadow-black/40 backdrop-blur"
+          className="space-y-4 rounded-2xl border border-hairline bg-panel/80 p-6 shadow-xl shadow-black/40 backdrop-blur"
         >
           <label className="block space-y-1">
             <span className="text-sm text-neutral-300">Movie</span>
             <select
               value={movieChoice}
               onChange={(event) => setMovieChoice(event.target.value)}
-              className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-marquee focus:outline-none focus:ring-1 focus:ring-marquee/60"
+              className="w-full rounded-md border border-hairline bg-white/[0.03] px-3 py-2 text-neutral-100 focus:border-red focus:outline-none focus:ring-1 focus:ring-red/60"
             >
               <option value={NEW_MOVIE}>＋ New movie…</option>
               {(moviesQuery.data ?? []).map((movie) => (
@@ -151,7 +149,7 @@ export const AdminScreen = () => {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="w-full rounded-xl bg-marquee px-4 py-2.5 font-bold uppercase tracking-wide text-black transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-marquee focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
+            className="w-full rounded-xl bg-red px-4 py-2.5 font-bold text-white transition hover:bg-red-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-red-soft focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:opacity-60"
           >
             {mutation.isPending ? "Adding…" : "Add screening"}
           </button>
@@ -159,13 +157,11 @@ export const AdminScreen = () => {
       </section>
 
       <section>
-        <h2 className="mb-4 text-lg font-black uppercase tracking-tight text-white">
-          Scheduled screenings
-        </h2>
+        <h2 className="mb-4 text-lg font-bold tracking-tight text-white">Scheduled screenings</h2>
         {screeningsQuery.isPending ? (
           <p className="text-neutral-400">Loading…</p>
         ) : (screeningsQuery.data ?? []).length === 0 ? (
-          <p className="text-neutral-400">No screenings yet.</p>
+          <p className="text-neutral-400">No screenings yet. The projector is lonely.</p>
         ) : (
           <ul className="space-y-3">
             {(screeningsQuery.data ?? []).map((screening) => (
@@ -179,7 +175,7 @@ export const AdminScreen = () => {
 };
 
 const ScreeningRow = ({ screening }: { screening: Screening }) => (
-  <li className="flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-3">
+  <li className="flex items-center gap-3 rounded-xl border border-hairline bg-white/[0.03] p-3">
     <Poster src={screening.movieImageUrl} alt={screening.movieTitle} className="h-16 w-12" />
     <div className="min-w-0">
       <p className="truncate font-bold text-white">{screening.movieTitle}</p>
@@ -204,8 +200,8 @@ const Field = ({ label, type = "text", value, error, onChange }: FieldProps) => 
       value={value}
       onChange={(event) => onChange(event.target.value)}
       aria-invalid={error ? true : undefined}
-      className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-marquee focus:outline-none focus:ring-1 focus:ring-marquee/60"
+      className="w-full rounded-md border border-hairline bg-white/[0.03] px-3 py-2 text-neutral-100 focus:border-red focus:outline-none focus:ring-1 focus:ring-red/60"
     />
-    {error && <span className="text-xs text-red-400">{error}</span>}
+    {error && <span className="text-xs text-red-soft">{error}</span>}
   </label>
 );

@@ -1,3 +1,4 @@
+import { SEAT_STATE } from "@cinema/shared";
 import type { SeatMap as SeatMapData, SeatMapRow, SeatView } from "@cinema/shared";
 import { Legend } from "./Legend";
 import { Seat } from "./Seat";
@@ -10,12 +11,17 @@ interface SeatMapProps {
 }
 
 export const SeatMap = ({ seatMap, selected, onSeatClick }: SeatMapProps) => {
+  const openSeats = seatMap.rows.reduce(
+    (total, row) => total + row.seats.filter((seat) => seat.status === SEAT_STATE.available).length,
+    0,
+  );
+
   const renderRow = (row: SeatMapRow) => (
-    <div key={row.rowLabel} className="flex items-center gap-1.5">
-      <span className="w-5 shrink-0 text-right text-xs font-semibold text-neutral-500">
+    <div key={row.rowLabel} className="flex items-center gap-2">
+      <span className="w-4 shrink-0 text-right font-mono text-[10px] text-neutral-600">
         {row.rowLabel}
       </span>
-      <div className="flex flex-1 justify-center gap-1.5">
+      <div className="flex flex-1 justify-center gap-2">
         {row.seats.map((seat) => (
           <Seat
             key={seat.id}
@@ -27,31 +33,35 @@ export const SeatMap = ({ seatMap, selected, onSeatClick }: SeatMapProps) => {
           />
         ))}
       </div>
-      <span aria-hidden="true" className="w-5 shrink-0" />
+      <span aria-hidden="true" className="w-4 shrink-0" />
     </div>
   );
 
   return (
-    <div className="space-y-8">
-      <Legend />
-      <div className="overflow-x-auto pb-2">
-        <div className="mx-auto flex min-w-max flex-col items-center gap-8">
-          <div className="w-full max-w-lg space-y-1.5">
-            <div
-              aria-hidden="true"
-              className="mx-auto h-2.5 w-11/12 rounded-t-full bg-gradient-to-b from-curtain to-curtain-deep shadow-inner"
-            />
-            <div className="animate-screen-glow rounded-md bg-gradient-to-b from-screen to-neutral-400 py-1.5 text-center text-xs font-black uppercase tracking-[0.35em] text-black [transform:perspective(30rem)_rotateX(32deg)]">
-              Screen
-            </div>
-            <p className="text-center text-[0.65rem] uppercase tracking-widest text-neutral-500">
-              All eyes this way
-            </p>
-          </div>
+    <div className="space-y-9">
+      <div className="mx-auto w-full max-w-lg">
+        <div
+          aria-hidden="true"
+          className="animate-screen-glow mx-auto h-[5px] w-3/5 rounded-full bg-red"
+        />
+        <p className="mt-2.5 text-center font-mono text-[9px] uppercase tracking-[0.16em] text-neutral-600">
+          Screen · all eyes this way
+        </p>
+      </div>
 
-          <div className="flex flex-col gap-1.5">{seatMap.rows.map(renderRow)}</div>
+      {openSeats === 0 && (
+        <p className="mx-auto max-w-md rounded-xl border border-hairline bg-white/[0.03] px-4 py-3 text-center text-sm text-neutral-300">
+          Well… seat happened. Every seat here is spoken for.
+        </p>
+      )}
+
+      <div className="overflow-x-auto px-2 py-2">
+        <div className="mx-auto flex min-w-max flex-col items-center gap-2">
+          {seatMap.rows.map(renderRow)}
         </div>
       </div>
+
+      <Legend />
     </div>
   );
 };

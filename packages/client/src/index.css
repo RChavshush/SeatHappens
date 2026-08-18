@@ -1,27 +1,35 @@
 @import "tailwindcss";
 
 @theme {
-  /* Seat states — fill + a distinctly shaped border per state (never colour alone) */
-  --color-seat-available: #171717;
-  --color-seat-available-border: #525252;
-  --color-seat-held: #262626;
-  --color-seat-held-border: #a3a3a3;
-  --color-seat-mine: #2e2e05;
-  --color-seat-mine-border: #fde047;
-  --color-seat-booked: #450a0a;
-  --color-seat-booked-border: #ef4444;
-  --color-seat-mine-booked: #4a2d05;
-  --color-seat-mine-booked-border: #fbbf24;
-  --color-seat-disabled: #0a0a0a;
-  --color-seat-disabled-border: #1f1f1f;
+  /* Seat statuses — fill + a distinct border style per state (never colour alone).
+     Available (solid) / Reserved = held (amber dashed) / Booked (dim solid).
+     Your picks and your own booking carry the brand red. */
+  --color-seat-available: transparent;
+  --color-seat-available-border: #6b6b74;
+  --color-seat-reserved: rgba(245, 166, 35, 0.12);
+  --color-seat-reserved-border: #f5a623;
+  --color-seat-booked: rgba(255, 255, 255, 0.05);
+  --color-seat-booked-border: #2a2a30;
+  --color-seat-mine: #e50914;
+  --color-seat-mine-border: #ff4d57;
+  --color-seat-mine-booked: rgba(229, 9, 20, 0.18);
+  --color-seat-mine-booked-border: #ff4d57;
 
-  /* Monochrome + electric-yellow accent (from the reference palette) */
-  --color-marquee: #fbff00;
-  --color-brand: #fbff00;
-  --color-brand-2: #d4ff00;
-  --color-curtain: #b91c1c;
-  --color-curtain-deep: #450a0a;
-  --color-screen: #f5f5f5;
+  /* Netflix-inspired: deep near-black + bold red accent */
+  --color-red: #e50914;
+  --color-red-deep: #b20710;
+  --color-red-soft: #ff4d57;
+  --color-amber: #f5a623;
+  --color-go: #46d369;
+
+  --color-ink: #0a0a0b;
+  --color-panel: #141416;
+  --color-card: #1c1c1f;
+  --color-hairline: rgba(255, 255, 255, 0.09);
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
 html,
@@ -32,27 +40,33 @@ body,
 
 body {
   margin: 0;
-  color: #fafafa;
-  font-family: Inter, system-ui, sans-serif;
-  background-color: #000000;
-  background-image: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(251, 255, 0, 0.05), transparent 65%);
-  background-attachment: fixed;
+  color: #f5f5f7;
+  font-family: var(--font-sans);
+  background-color: #0a0a0b;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
 }
 
 @keyframes screen-glow {
   0%,
   100% {
-    box-shadow: 0 0 60px -16px rgba(251, 255, 0, 0.35);
+    box-shadow: 0 0 30px 2px rgba(229, 9, 20, 0.4);
   }
   50% {
-    box-shadow: 0 0 90px -10px rgba(251, 255, 0, 0.5);
+    box-shadow: 0 0 46px 4px rgba(229, 9, 20, 0.6);
   }
 }
 
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.96);
+    transform: translateY(10px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -60,12 +74,34 @@ body {
   }
 }
 
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
 .animate-screen-glow {
-  animation: screen-glow 4s ease-in-out infinite;
+  animation: screen-glow 4.5s ease-in-out infinite;
 }
 
 .animate-toast-in {
   animation: toast-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rail-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+.rail-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.rail-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -43,7 +43,7 @@ export const useErrorToast = (): ((error: unknown) => void) => {
   return useCallback(
     (error: unknown) => {
       const message =
-        error instanceof ApiError ? error.message : "Something went wrong.";
+        error instanceof ApiError ? error.message : "Seat happens. Try again.";
       push(TOAST_TONE.error, message);
     },
     [push],

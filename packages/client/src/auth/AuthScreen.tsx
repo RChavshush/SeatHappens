@@ -50,66 +50,67 @@ export const AuthScreen = () => {
   const serverError = mutation.error instanceof ApiError ? mutation.error.message : null;
 
   return (
-    <main className="flex min-h-full items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-5">
+    <main className="relative flex min-h-full items-center justify-center overflow-hidden p-4">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-red/15 blur-3xl"
+      />
+      <div className="relative w-full max-w-sm space-y-5">
         <div className="text-center">
-          <div aria-hidden="true" className="text-4xl">
-            🎬🍿
-          </div>
-          <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white">
-            The Corner Cinema
+          <h1 className="text-4xl font-bold tracking-tight text-white">
+            Seat<span className="text-red">Happens</span>
           </h1>
-          <p className="mt-1 text-sm text-marquee">
-            Grab your seat before someone else grabs the popcorn.
+          <p className="mt-1.5 text-sm text-neutral-400">
+            Seat happens. Pick yours.
           </p>
         </div>
 
         <form
           onSubmit={onSubmit}
           noValidate
-          className="space-y-4 rounded-2xl border border-neutral-800 bg-neutral-950/80 p-6 shadow-xl shadow-black/40 backdrop-blur"
+          className="space-y-4 rounded-2xl border border-hairline bg-panel/80 p-6 shadow-xl shadow-black/40 backdrop-blur"
         >
           <h2 className="text-lg font-bold text-white">
-            {mode === AUTH_MODE.login ? "Welcome back" : "Join the club"}
+            {mode === AUTH_MODE.login ? "Welcome back" : "Save yourself a seat"}
           </h2>
 
-        <Field
-          label="Email"
-          type="email"
-          value={email}
-          error={errors.email}
-          onChange={setEmail}
-          autoComplete="email"
-        />
-        <Field
-          label="Password"
-          type="password"
-          value={password}
-          error={errors.password}
-          onChange={setPassword}
-          autoComplete={mode === AUTH_MODE.login ? "current-password" : "new-password"}
-        />
-        {mode === AUTH_MODE.register && (
           <Field
-            label="Display name"
-            type="text"
-            value={displayName}
-            error={errors.displayName}
-            onChange={setDisplayName}
-            autoComplete="name"
+            label="Email"
+            type="email"
+            value={email}
+            error={errors.email}
+            onChange={setEmail}
+            autoComplete="email"
           />
-        )}
+          <Field
+            label="Password"
+            type="password"
+            value={password}
+            error={errors.password}
+            onChange={setPassword}
+            autoComplete={mode === AUTH_MODE.login ? "current-password" : "new-password"}
+          />
+          {mode === AUTH_MODE.register && (
+            <Field
+              label="Display name"
+              type="text"
+              value={displayName}
+              error={errors.displayName}
+              onChange={setDisplayName}
+              autoComplete="name"
+            />
+          )}
 
-        {serverError && (
-          <p role="alert" className="text-sm text-red-400">
-            {serverError}
-          </p>
-        )}
+          {serverError && (
+            <p role="alert" className="text-sm text-red-soft">
+              {serverError}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="w-full rounded-xl bg-marquee px-4 py-2.5 font-bold uppercase tracking-wide text-black transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-marquee focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-60"
+            className="w-full rounded-xl bg-red px-4 py-2.5 font-bold text-white transition hover:bg-red-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-red-soft focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:opacity-60"
           >
             {mutation.isPending
               ? "Rolling the reel…"
@@ -120,12 +121,14 @@ export const AuthScreen = () => {
 
           <button
             type="button"
-            onClick={() => switchMode(mode === AUTH_MODE.login ? AUTH_MODE.register : AUTH_MODE.login)}
-            className="w-full text-sm text-neutral-400 transition hover:text-marquee"
+            onClick={() =>
+              switchMode(mode === AUTH_MODE.login ? AUTH_MODE.register : AUTH_MODE.login)
+            }
+            className="w-full text-sm text-neutral-400 transition hover:text-white"
           >
             {mode === AUTH_MODE.login
               ? "New here? Create an account"
-              : "Already have an account? Sign in"}
+              : "Already have a seat? Sign in"}
           </button>
         </form>
       </div>
@@ -151,8 +154,8 @@ const Field = ({ label, type, value, error, autoComplete, onChange }: FieldProps
       autoComplete={autoComplete}
       onChange={(event) => onChange(event.target.value)}
       aria-invalid={error ? true : undefined}
-      className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-marquee focus:outline-none focus:ring-1 focus:ring-marquee/60"
+      className="w-full rounded-md border border-hairline bg-white/[0.03] px-3 py-2 text-neutral-100 focus:border-red focus:outline-none focus:ring-1 focus:ring-red/60"
     />
-    {error && <span className="text-xs text-red-400">{error}</span>}
+    {error && <span className="text-xs text-red-soft">{error}</span>}
   </label>
 );
