@@ -127,3 +127,15 @@ describe("createHold — connected group across rows", () => {
     await request(app).delete(`/holds/${res.body.id}`).auth(userA.token, { type: "bearer" });
   });
 });
+
+describe("createHold — no seat-count cap", () => {
+  it("accepts a connected group of more than 10 seats", async () => {
+    const g = await seatIdsForRow("G"); // full 10-seat row
+    const h = await seatIdsForRow("H");
+    // G1..G10 + H1 (H1 connects to G10 via the wrap) = 11 seats
+    const res = await postHold(userA, [...g, h[0]!]);
+    expect(res.status).toBe(201);
+    expect(res.body.seatIds).toHaveLength(11);
+    await request(app).delete(`/holds/${res.body.id}`).auth(userA.token, { type: "bearer" });
+  });
+});
